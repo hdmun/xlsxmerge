@@ -1,4 +1,6 @@
-﻿namespace NexonKorea.XlsxMerge
+﻿using XlsxMerge.View;
+
+namespace XlsxMerge
 {
     internal static class Program
     {

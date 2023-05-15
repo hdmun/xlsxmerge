@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NexonKorea.XlsxMerge
+namespace XlsxMerge
 {
 	public class ParsedXlsx
 	{

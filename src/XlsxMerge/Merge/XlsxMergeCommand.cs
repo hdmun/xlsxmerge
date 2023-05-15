@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NexonKorea.XlsxMerge
+namespace XlsxMerge
 {
 	// XlsxMergeDecision으로부터, 실제 조립 명령어를 만들어 냅니다.
 	class XlsxMergeCommand

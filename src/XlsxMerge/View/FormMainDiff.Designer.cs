@@ -1,6 +1,6 @@
-﻿namespace NexonKorea.XlsxMerge
+﻿namespace XlsxMerge.View
 {
-    partial class FormMainDiff
+	partial class FormMainDiff
     {
         /// <summary>
         /// Required designer variable.

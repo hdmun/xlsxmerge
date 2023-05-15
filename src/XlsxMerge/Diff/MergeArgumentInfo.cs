@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 
-namespace NexonKorea.XlsxMerge
+namespace XlsxMerge
 {
     public class MergeArgumentInfo
     {

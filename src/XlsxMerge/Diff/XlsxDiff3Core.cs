@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
-namespace NexonKorea.XlsxMerge
+namespace XlsxMerge
 {
     class XlsxDiff3Core
     {

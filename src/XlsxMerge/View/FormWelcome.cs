@@ -9,9 +9,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using NexonKorea.XlsxMerge;
+using XlsxMerge;
 
-namespace NexonKorea.XlsxMerge
+namespace XlsxMerge.View
 {
     public partial class FormWelcome : Form
     {

@@ -5,7 +5,7 @@ using System.Linq;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Runtime.InteropServices;
 
-namespace NexonKorea.XlsxMerge
+namespace XlsxMerge
 {
     class ParsedXlsxGenerator : IDisposable
     {
