@@ -28,7 +28,7 @@ namespace XlsxMerge
             if (String.IsNullOrEmpty(exeFolderPath) == false)
                 Directory.SetCurrentDirectory(exeFolderPath);
 
-            DiffPathViewModel pathViewModel = new DiffPathViewModel();
+            PathViewModel pathViewModel = new PathViewModel();
 
             if (argumentInfo != null)
             {

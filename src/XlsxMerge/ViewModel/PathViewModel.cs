@@ -2,22 +2,17 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using XlsxMerge.Extensions;
+using XlsxMerge.Model;
 
 namespace XlsxMerge.ViewModel;
 
-public class DiffPathViewModel : INotifyPropertyChanged
+public class PathViewModel : INotifyPropertyChanged
 {
-    private string _basePath;
-    private string _minePath;
-    private string _theirsPath;
-    private string _resultPath;
+    public DiffPathModel DiffPathModel { get; private set; }
 
-    public DiffPathViewModel()
+    public PathViewModel()
     {
-        _basePath = string.Empty;
-        _minePath = string.Empty;
-        _theirsPath = string.Empty;
-        _resultPath = string.Empty;
+        DiffPathModel = new DiffPathModel();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -45,40 +40,40 @@ public class DiffPathViewModel : INotifyPropertyChanged
 
     public string BasePath
     {
-        get => _basePath;
+        get => DiffPathModel.BasePath;
         set
         {
-            _basePath = value;
+            DiffPathModel.BasePath = value;
             OnPropertyChanged();
         }
     }
 
     public string MinePath
     {
-        get => _minePath;
+        get => DiffPathModel.MinePath;
         set
         {
-            _minePath = value;
+            DiffPathModel.MinePath = value;
             OnPropertyChanged();
         }
     }
 
     public string TheirsPath
     {
-        get => _theirsPath;
+        get => DiffPathModel.TheirsPath;
         set
         {
-            _theirsPath = value;
+            DiffPathModel.TheirsPath = value;
             OnPropertyChanged();
         }
     }
 
     public string ResultPath
     {
-        get => _resultPath;
+        get => DiffPathModel.ResultPath;
         set
         {
-            _resultPath = value;
+            DiffPathModel.ResultPath = value;
             OnPropertyChanged();
         }
     }
