@@ -22,17 +22,17 @@ public class PathViewModel : INotifyPropertyChanged
         var args = new List<string>
         {
             $"{Assembly.GetEntryAssembly()?.GetName().Name}.exe",
-            $"-b={BasePath.AddDoubleQuote()}",
-            $"-d={MinePath.AddDoubleQuote()}"
+            $"-b {BasePath.AddDoubleQuote()}",
+            $"-d {MinePath.AddDoubleQuote()}"
         };
         if (use3wayMerge)
-            args.Add($"-s={TheirsPath.AddDoubleQuote()}");
+            args.Add($"-s {TheirsPath.AddDoubleQuote()}");
 
         if (!string.IsNullOrEmpty(ResultPath))
-            args.Add($"-r={ResultPath.AddDoubleQuote()}");
+            args.Add($"-r {ResultPath.AddDoubleQuote()}");
 
         string resultArgs = string.Join(" ", args);
-        if (resultArgs.Contains("=\"\""))
+        if (resultArgs.Contains("\"\""))
             return null;
 
         return args;

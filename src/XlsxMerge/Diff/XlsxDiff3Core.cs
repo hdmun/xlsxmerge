@@ -6,6 +6,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using XlsxMerge.Diff;
 
 namespace XlsxMerge
 {

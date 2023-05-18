@@ -1,4 +1,5 @@
-﻿using XlsxMerge.View;
+﻿using XlsxMerge.Diff;
+using XlsxMerge.View;
 using XlsxMerge.ViewModel;
 
 namespace XlsxMerge
@@ -15,7 +16,7 @@ namespace XlsxMerge
             MergeArgumentInfo? argumentInfo = null;
             if (args.Length > 1)
             {
-                argumentInfo = new MergeArgumentInfo(args);
+                argumentInfo = MergeArgumentInfo.Parse(args);
                 if (argumentInfo.ComparisonMode == ComparisonMode.Unknown)
                 {
                     argumentInfo = null;
@@ -32,8 +33,7 @@ namespace XlsxMerge
 
             if (argumentInfo != null)
             {
-                var formMainDiff = new FormMainDiff();
-                formMainDiff.MergeArgs = argumentInfo;
+                var formMainDiff = new FormMainDiff(argumentInfo);
                 Application.Run(formMainDiff);
                 if (formMainDiff.MergeSuccessful)
                     return 0;

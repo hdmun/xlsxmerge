@@ -10,15 +10,19 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using XlsxMerge;
 using XlsxMerge.Extensions;
+using XlsxMerge.Diff;
 
 namespace XlsxMerge.View
 {
 	public partial class FormMainDiff : Form
 	{
-		public MergeArgumentInfo MergeArgs = null;
-		public FormMainDiff()
+		public readonly MergeArgumentInfo MergeArgs;
+
+		public FormMainDiff(MergeArgumentInfo args)
 		{
 			InitializeComponent();
+
+			MergeArgs = args;
 		}
 
 		XlsxMergeDecision _xlsxMergeDecision = new XlsxMergeDecision();
