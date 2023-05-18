@@ -1,4 +1,5 @@
 ﻿using XlsxMerge.View;
+using XlsxMerge.ViewModel;
 
 namespace XlsxMerge
 {
@@ -27,6 +28,8 @@ namespace XlsxMerge
             if (String.IsNullOrEmpty(exeFolderPath) == false)
                 Directory.SetCurrentDirectory(exeFolderPath);
 
+            DiffPathViewModel pathViewModel = new DiffPathViewModel();
+
             if (argumentInfo != null)
             {
                 var formMainDiff = new FormMainDiff();
@@ -37,7 +40,7 @@ namespace XlsxMerge
             }
             else
             {
-                Application.Run(new FormWelcome());
+                Application.Run(new FormWelcome(pathViewModel));
             }
 
             return 1;
