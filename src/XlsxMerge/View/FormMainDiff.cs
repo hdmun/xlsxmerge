@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using XlsxMerge;
+using XlsxMerge.Extensions;
 
 namespace XlsxMerge.View
 {
@@ -225,20 +226,6 @@ namespace XlsxMerge.View
 			}
 		}
 
-		public static string GetDisplayTextForMergeMode(WorksheetMergeMode workeMergeMode)
-		{
-			switch (workeMergeMode)
-			{
-				case WorksheetMergeMode.Unchanged: return "변경 사항 없음";
-				case WorksheetMergeMode.Delete: return "이 워크시트 삭제";
-				case WorksheetMergeMode.UseBase: return "Base 버전으로 워크시트 사용";
-				case WorksheetMergeMode.UseMine: return"Mine 버전으로 워크시트 사용";
-				case WorksheetMergeMode.UseTheirs: return "Theirs 버전으로 워크시트 사용";
-				case WorksheetMergeMode.Merge: return "변경점 직접 머지";
-			}
-
-			return null;
-		}
 		private void linkLabelChangeWorksheetMergeMode_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
 		{
 			var sheetDecision = getCurrentSheetDecision();
@@ -256,8 +243,8 @@ namespace XlsxMerge.View
 			foreach (var eachDecision in sheetDecision.MergeModeCandidates)
 			{
 				var newMenuItem = new ToolStripMenuItem();
-				newMenuItem.Text = GetDisplayTextForMergeMode(eachDecision);
-				newMenuItem.ShortcutKeyDisplayString = eachDecision.ToString(); 
+				newMenuItem.Text = eachDecision.GetDisplayText();
+                newMenuItem.ShortcutKeyDisplayString = eachDecision.ToString(); 
 				newMenuItem.Tag = new List<WorksheetMergeMode>() { eachDecision };
 				newMenuItem.Click += MergeModeClick;
 				contextMenuStrip1.Items.Add(newMenuItem);
@@ -298,17 +285,6 @@ namespace XlsxMerge.View
 			HighlightFocusedHunk();
 		}
 
-		public static string GetDisplayTextForMergeOrder(List<DocOrigin> candidate)
-		{
-			if (candidate == null)
-				return "충돌 상태 그대로 두기";
-			if (candidate.Count == 0)
-				return "삭제하기";
-			if (candidate.Count == 1)
-				return (candidate[0].ToString() + " 변경점만 적용");
-			return "조합 : " + String.Join(" > ", candidate.Select(r => r.ToString()));
-		}
-
 		private void linkLabelChangeMergeOrder_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
 		{
 			var sheetDecision = getCurrentSheetDecision();
@@ -332,7 +308,7 @@ namespace XlsxMerge.View
 			foreach (var candidate in sheetDecision.HunkMergeDecisionList[_focusedHunkIdx].DocMergeOrderCandidates)
 			{
 				var newMenuItem = new ToolStripMenuItem();
-				newMenuItem.Text = GetDisplayTextForMergeOrder(candidate);
+				newMenuItem.Text = candidate.GetDisplayText();
 
 				if (candidate == null)
 					newMenuItem.ShortcutKeyDisplayString = "Conflict";
@@ -410,7 +386,7 @@ namespace XlsxMerge.View
 			var sheetResult = sheetDecision.SheetDiffResult;
 
 			label2.Text = label2.Text + sheetResult.WorksheetName;
-			labelCurrentWorksheetMergeMode.Text = GetDisplayTextForMergeMode(sheetDecision.MergeModeDecision);
+			labelCurrentWorksheetMergeMode.Text = sheetDecision.MergeModeDecision.GetDisplayText();
 			labelTotalDiffHunks.Text = $"{sheetDecision.HunkMergeDecisionList.Count}";
 
 			if (sheetDecision.MergeModeDecision == WorksheetMergeMode.Merge)
@@ -445,7 +421,7 @@ namespace XlsxMerge.View
 			labelCurrentDiffHunkIdx.Text = $"{_focusedHunkIdx + 1}";
 			var displayString = "---";
 			if (sheetDecision != null && _focusedHunkIdx >= 0 && _focusedHunkIdx < sheetDecision.HunkMergeDecisionList.Count)
-				displayString = GetDisplayTextForMergeOrder(sheetDecision.HunkMergeDecisionList[_focusedHunkIdx].DocMergeOrder);
+				displayString = sheetDecision.HunkMergeDecisionList[_focusedHunkIdx].DocMergeOrder.GetDisplayText();
 			labelCurrentMergeOrder.Text = displayString;
 		}
 
