@@ -1,4 +1,5 @@
 ﻿using XlsxMerge.Diff;
+using XlsxMerge.Model;
 using XlsxMerge.View;
 using XlsxMerge.ViewModel;
 
@@ -13,10 +14,10 @@ namespace XlsxMerge
 
             var args = Environment.GetCommandLineArgs();
 
-            MergeArgumentInfo? argumentInfo = null;
+            ProgramOptions? argumentInfo = null;
             if (args.Length > 1)
             {
-                argumentInfo = MergeArgumentInfo.Parse(args);
+                argumentInfo = ProgramOptions.Parse(args);
                 if (argumentInfo.ComparisonMode == ComparisonMode.Unknown)
                 {
                     argumentInfo = null;
@@ -33,7 +34,8 @@ namespace XlsxMerge
 
             if (argumentInfo != null)
             {
-                var formMainDiff = new FormMainDiff(argumentInfo);
+                pathViewModel.DiffPathModel = DiffPathModel.From(argumentInfo);
+                var formMainDiff = new FormMainDiff(pathViewModel);
                 Application.Run(formMainDiff);
                 if (formMainDiff.MergeSuccessful)
                     return 0;

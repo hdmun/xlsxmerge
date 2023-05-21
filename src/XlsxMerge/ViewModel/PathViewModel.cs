@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using XlsxMerge.Diff;
 using XlsxMerge.Extensions;
 using XlsxMerge.Model;
 
@@ -8,7 +9,7 @@ namespace XlsxMerge.ViewModel;
 
 public class PathViewModel : INotifyPropertyChanged
 {
-    public DiffPathModel DiffPathModel { get; private set; }
+    public DiffPathModel DiffPathModel { get; set; }
 
     public PathViewModel()
     {
@@ -45,6 +46,8 @@ public class PathViewModel : INotifyPropertyChanged
         {
             DiffPathModel.BasePath = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(BasePathLabelText));
+            OnPropertyChanged(nameof(VisibleTheirsPath));
         }
     }
 
@@ -55,6 +58,8 @@ public class PathViewModel : INotifyPropertyChanged
         {
             DiffPathModel.MinePath = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(MinePathLabelText));
+            OnPropertyChanged(nameof(VisibleTheirsPath));
         }
     }
 
@@ -65,6 +70,8 @@ public class PathViewModel : INotifyPropertyChanged
         {
             DiffPathModel.TheirsPath = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(TheirsPathLabelText));
+            OnPropertyChanged(nameof(VisibleTheirsPath));
         }
     }
 
@@ -75,6 +82,52 @@ public class PathViewModel : INotifyPropertyChanged
         {
             DiffPathModel.ResultPath = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(ResultPathLabelText));
+            OnPropertyChanged(nameof(VisibleResultPath));
+        }
+    }
+
+    public string BasePathLabelText
+    {
+        get => $"Base : {Path.GetFileName(BasePath)} ({BasePath})";
+    }
+
+    public string MinePathLabelText
+    {
+        get => $"Mine (Destination, Current) : {Path.GetFileName(MinePath)} ({MinePath})";
+    }
+
+    public string TheirsPathLabelText
+    {
+        get => $"Theirs (Source, Others) : {Path.GetFileName(TheirsPath)} ({TheirsPath})";
+    }
+
+    public string ResultPathLabelText
+    {
+        get => $"Result : {Path.GetFileName(ResultPath)} ({ResultPath})";
+    }
+
+    public bool VisibleTheirsPath
+    {
+        get => ComparisonMode == ComparisonMode.ThreeWay;
+    }
+
+    public bool VisibleResultPath
+    {
+        get => string.IsNullOrEmpty(ResultPath) == false;
+    }
+
+    public ComparisonMode ComparisonMode
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(BasePath) || string.IsNullOrEmpty(MinePath))
+                return ComparisonMode.Unknown;
+
+            if (string.IsNullOrEmpty(TheirsPath))
+                return ComparisonMode.TwoWay;
+
+            return ComparisonMode.ThreeWay;
         }
     }
 

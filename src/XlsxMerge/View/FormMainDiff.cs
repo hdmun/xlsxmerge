@@ -11,18 +11,25 @@ using System.Text;
 using XlsxMerge;
 using XlsxMerge.Extensions;
 using XlsxMerge.Diff;
+using XlsxMerge.ViewModel;
 
 namespace XlsxMerge.View
 {
 	public partial class FormMainDiff : Form
 	{
-		public readonly MergeArgumentInfo MergeArgs;
+		private readonly PathViewModel _pathViewModel;
 
-		public FormMainDiff(MergeArgumentInfo args)
+        public FormMainDiff(PathViewModel pathViewModel)
 		{
 			InitializeComponent();
 
-			MergeArgs = args;
+            // UI 준비
+            labelPathBase.BackColor = ColorScheme.BaseBackground;
+            labelPathMine.BackColor = ColorScheme.MineBackground;
+            labelPathTheirs.BackColor = ColorScheme.TheirsBackground;
+            labelPathResult.BackColor = ColorScheme.DiffHunk;
+
+            _pathViewModel = pathViewModel;
 		}
 
 		XlsxMergeDecision _xlsxMergeDecision = new XlsxMergeDecision();
@@ -36,50 +43,44 @@ namespace XlsxMerge.View
         private void FormMainDiff_Load(object sender, EventArgs e)
         {
             this.Text = VersionName.GetFormTitleText();
-            // UI 준비
-            labelPathBase.BackColor = ColorScheme.BaseBackground;
-			labelPathMine.BackColor = ColorScheme.MineBackground;
-			labelPathTheirs.BackColor = ColorScheme.TheirsBackground;
-			labelPathResult.BackColor = ColorScheme.DiffHunk;
 
-			labelPathBase.Text = $"Base : {Path.GetFileName(MergeArgs.BasePath)} ({MergeArgs.BasePath})";
-			labelPathMine.Text = $"Mine (Destination, Current) : {Path.GetFileName(MergeArgs.MinePath)} ({MergeArgs.MinePath})";
+            // 데이터 바인딩
+            labelPathBase.BindingText(_pathViewModel, nameof(_pathViewModel.BasePathLabelText));
+            labelPathMine.BindingText(_pathViewModel, nameof(_pathViewModel.MinePathLabelText));
 
-			labelPathTheirs.Visible = false;
-			if (MergeArgs.ComparisonMode == ComparisonMode.ThreeWay)
-			{
-				labelPathTheirs.Visible = true;
-				labelPathTheirs.Text = $"Theirs (Source, Others) : {Path.GetFileName(MergeArgs.TheirsPath)} ({MergeArgs.TheirsPath})";
-			}
+            labelPathTheirs.BindingVisible(_pathViewModel, nameof(_pathViewModel.VisibleTheirsPath));
+            labelPathTheirs.BindingText(_pathViewModel, nameof(_pathViewModel.TheirsPathLabelText));
 
-			labelPathResult.Visible = false;
-			if (String.IsNullOrEmpty(MergeArgs.ResultPath) == false)
-			{
-				labelPathResult.Visible = true;
-				labelPathResult.Text = $"Result : {Path.GetFileName(MergeArgs.ResultPath)} ({MergeArgs.ResultPath})";
-				buttonSaveMergeResult.Text = "머지 결과 저장 후 닫기";
-			}
-			panelTop.Height = labelPathResult.Bounds.Bottom;
+            labelPathResult.BindingVisible(_pathViewModel, nameof(_pathViewModel.VisibleResultPath));
+            labelPathResult.BindingText(_pathViewModel, nameof(_pathViewModel.ResultPathLabelText));
+            if (_pathViewModel.VisibleResultPath)
+            {
+                buttonSaveMergeResult.Text = "머지 결과 저장 후 닫기";
+            }
 
-	        textBox1.Text = "(정보 없음)";
-	        if (String.IsNullOrEmpty(MergeArgs.ExtraInfoPath) == false)
-	        {
-		        try
-		        {
-			        var fileContent = File.ReadAllText(MergeArgs.ExtraInfoPath);
-			        textBox1.Text = fileContent;
-		        }
-		        catch
-		        {
-		        }
-	        }
+            panelTop.Height = labelPathResult.Bounds.Bottom;
 
-	        listViewWorksheets.Clear();
+            // TODO: 나중에 정리
+            // textBox1.Text = "(정보 없음)";
+            // if (string.IsNullOrEmpty(MergeArgs.ExtraInfoPath) == false)
+            // {
+            //     try
+            //     {
+            //         var fileContent = File.ReadAllText(MergeArgs.ExtraInfoPath);
+            //         textBox1.Text = fileContent;
+            //     }
+            //     catch
+            //     {
+            //     }
+            // }
+
+            // initialize listViewWorksheets columns
+            listViewWorksheets.Clear();
 			listViewWorksheets.Columns.Add("워크시트 이름", 150);
-			if (MergeArgs.ComparisonMode == ComparisonMode.ThreeWay)
+			if (_pathViewModel.ComparisonMode == ComparisonMode.ThreeWay)
 				listViewWorksheets.Columns.Add("충돌", 50);
 			listViewWorksheets.Columns.Add("Mine (Dest/Curr)", 60);
-			if (MergeArgs.ComparisonMode == ComparisonMode.ThreeWay)
+			if (_pathViewModel.ComparisonMode == ComparisonMode.ThreeWay)
 				listViewWorksheets.Columns.Add("Theirs (Src/Others)", 60);
 
 			// double-buffer
@@ -91,7 +92,7 @@ namespace XlsxMerge.View
 
 			// diff3 진행
 			var diff3Data = new XlsxDiff3Core();
-			diff3Data.Run(MergeArgs);
+			diff3Data.Run(_pathViewModel);
 			FakeBackgroundWorker.OnUpdateProgress("xlsx 파일 비교", "비교 완료. 기본 설정 진행 중..");
 			_xlsxMergeDecision = new XlsxMergeDecision(diff3Data);
 
@@ -102,7 +103,7 @@ namespace XlsxMerge.View
 				var lvi = listViewWorksheets.Items.Add(sheetName);
 				lvi.UseItemStyleForSubItems = false;
 
-				if (MergeArgs.ComparisonMode == ComparisonMode.ThreeWay)
+				if (_pathViewModel.ComparisonMode == ComparisonMode.ThreeWay)
 				{
 					if (eachSheetResult.HunkList.Find(r => r.hunkStatus == Diff3HunkStatus.Conflict) != null)
 						lvi.SubItems.Add("발생").BackColor = Color.Gold;
@@ -112,7 +113,7 @@ namespace XlsxMerge.View
 
 				var kvpMine = GetSheetModificationSummary(eachSheetResult, DocOrigin.Mine);
 				lvi.SubItems.Add(kvpMine.Item1).BackColor = kvpMine.Item2;
-				if (MergeArgs.ComparisonMode == ComparisonMode.ThreeWay)
+				if (_pathViewModel.ComparisonMode == ComparisonMode.ThreeWay)
 				{
 					var kvpTheirs = GetSheetModificationSummary(eachSheetResult, DocOrigin.Theirs);
 					lvi.SubItems.Add(kvpTheirs.Item1).BackColor = kvpTheirs.Item2;
@@ -174,46 +175,23 @@ namespace XlsxMerge.View
 					return;
 			}
 
-			String mergedFilePath = MergeArgs.ResultPath;
-			if (String.IsNullOrEmpty(mergedFilePath))
-			{
-				if (saveFileDialog1.ShowDialog() != DialogResult.OK)
-					return;
+            if (!validateResultPath(out var mergedFilePath))
+                return;
 
-				mergedFilePath = saveFileDialog1.FileName;
-			}
+            _pathViewModel.ResultPath = mergedFilePath;
 
-            {
-                Dictionary<String, String> alertFileMap = new Dictionary<string, string>();
-                alertFileMap["Mine"] = MergeArgs.MinePath;
-                alertFileMap["Base"] = MergeArgs.BasePath;
-                alertFileMap["Theirs"] = MergeArgs.TheirsPath;
-                foreach (var alertItems in alertFileMap)
-                {
-                    if (String.IsNullOrEmpty(alertItems.Value))
-                        continue;
-                    if (HelperFunctions.IsTwoPathEqual(mergedFilePath, alertItems.Value) == false)
-                        continue;
-
-                    if (MessageBox.Show("결과를 저장할 경로와 " + alertItems.Key + " 파일 경로가 동일합니다."
-                        + Environment.NewLine + "다음에 다시 머지를 시도할 경우 변경된 파일이 쓰이게 됩니다."
-                        + Environment.NewLine + "계속 진행하시겠습니까?", "파일 경고",
-                            MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
-                        return;
-                }
-            }
-
-			XlsxMergeCommand cmd = new XlsxMergeCommand();
+            XlsxMergeCommand cmd = new XlsxMergeCommand();
 			cmd.Init(_xlsxMergeDecision);
 
 			using (var runner = new XlsxMergeCommandRunner())
 			{
-				runner.Run(cmd, MergeArgs.BasePath, MergeArgs.MinePath, MergeArgs.TheirsPath, mergedFilePath);
+				runner.Run(cmd, _pathViewModel.BasePath, _pathViewModel.MinePath, _pathViewModel.TheirsPath, mergedFilePath);
 			}
 
-			if (String.IsNullOrEmpty(MergeArgs.ResultPath))
+			if (string.IsNullOrEmpty(_pathViewModel.ResultPath))
 			{
-				if (MessageBox.Show("결과를 저장했습니다. 파일을 지금 열어보시겠습니까?", "완료", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                var dialogResult = MessageBox.Show("결과를 저장했습니다. 파일을 지금 열어보시겠습니까?", "완료", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
                 {
 					ProcessStartInfo psi = new ProcessStartInfo()
 					{
@@ -230,7 +208,44 @@ namespace XlsxMerge.View
 			}
 		}
 
-		private void linkLabelChangeWorksheetMergeMode_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private bool validateResultPath(out string resultPath)
+        {
+            resultPath = _pathViewModel.ResultPath;
+            if (string.IsNullOrEmpty(resultPath))
+            {
+                if (saveFileDialog1.ShowDialog() != DialogResult.OK)
+                    return false;
+
+                resultPath = saveFileDialog1.FileName;
+            }
+
+            var alertFileMap = new Dictionary<string, string>()
+                {
+                    { "Base", _pathViewModel.BasePath },
+                    { "Mine", _pathViewModel.MinePath },
+                    { "Theirs", _pathViewModel.TheirsPath},
+                };
+            foreach (var alertItems in alertFileMap)
+            {
+                if (string.IsNullOrEmpty(alertItems.Value))
+                    continue;
+
+                if (HelperFunctions.IsTwoPathEqual(resultPath, alertItems.Value) == false)
+                    continue;
+
+                if (MessageBox.Show(
+                    $"결과를 저장할 경로와 {alertItems.Key} 파일 경로가 동일합니다.{Environment.NewLine}" +
+                    $"다음에 다시 머지를 시도할 경우 변경된 파일이 쓰이게 됩니다.{Environment.NewLine}" +
+                    "계속 진행하시겠습니까?",
+                    "파일 경고",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                    return false;
+            }
+
+            return true;
+        }
+
+        private void linkLabelChangeWorksheetMergeMode_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
 		{
 			var sheetDecision = getCurrentSheetDecision();
 			if (sheetDecision == null)

@@ -3,11 +3,11 @@ using XlsxMerge.Diff;
 
 namespace XlsxMerge
 {
-    public class MergeArgumentInfo
+    public class ProgramOptions
     {
-        public static MergeArgumentInfo Parse(string[] args)
+        public static ProgramOptions Parse(string[] args)
         {
-            var result = Parser.Default.ParseArguments<MergeArgumentInfo>(args);
+            var result = Parser.Default.ParseArguments<ProgramOptions>(args);
             return result.Value;
         }
 

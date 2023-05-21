@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using XlsxMerge.Diff;
+using XlsxMerge.ViewModel;
 
 namespace XlsxMerge
 {
@@ -14,7 +15,7 @@ namespace XlsxMerge
     {
         public class SheetDiffResult
         {
-	        public MergeArgumentInfo MergeArgs = null;
+	        public ComparisonMode ComparisonMode = ComparisonMode.Unknown;
 			public string WorksheetName = "";
             public List<DocOrigin> DocsContaining = new List<DocOrigin>(); // 이 워크시트가 있는 문서.
             public List<DiffHunkInfo> HunkList = new List<DiffHunkInfo>();
@@ -26,22 +27,18 @@ namespace XlsxMerge
             }
         }
 
-	    public MergeArgumentInfo MergeArgs = null;
         public List<SheetDiffResult> SheetCompareResultList = new List<SheetDiffResult>();
         public Dictionary<DocOrigin, ParsedXlsx> ParsedWorkbookMap = new Dictionary<DocOrigin, ParsedXlsx>();
 
-        public void Run(MergeArgumentInfo mergeArgs)
+        public void Run(PathViewModel pathViewModel)
         {
-	        // 엑셀 워크시트에서 텍스트 추출 -> diff3 실행 -> 결과 해석의 순서.
-	        MergeArgs = mergeArgs;
-
 			// 엑셀 파일을 해석.
 			using (var parsedXlsxGenerator = new ParsedXlsxGenerator())
             {
-                ParsedWorkbookMap[DocOrigin.Base] = parsedXlsxGenerator.ParseXlsx(mergeArgs.BasePath);
-                ParsedWorkbookMap[DocOrigin.Mine] = parsedXlsxGenerator.ParseXlsx(mergeArgs.MinePath);
-                if (mergeArgs.ComparisonMode == ComparisonMode.ThreeWay)
-                    ParsedWorkbookMap[DocOrigin.Theirs] = parsedXlsxGenerator.ParseXlsx(mergeArgs.TheirsPath);
+                ParsedWorkbookMap[DocOrigin.Base] = parsedXlsxGenerator.ParseXlsx(pathViewModel.BasePath);
+                ParsedWorkbookMap[DocOrigin.Mine] = parsedXlsxGenerator.ParseXlsx(pathViewModel.MinePath);
+                if (pathViewModel.ComparisonMode == ComparisonMode.ThreeWay)
+                    ParsedWorkbookMap[DocOrigin.Theirs] = parsedXlsxGenerator.ParseXlsx(pathViewModel.TheirsPath);
             }
 
 	        FakeBackgroundWorker.OnUpdateProgress("xlsx 파일 비교  [3단계 중 3단계]", "엑셀 문서 비교 중..");
@@ -51,7 +48,7 @@ namespace XlsxMerge
 			var xlsxList = new List<ParsedXlsx>();
             xlsxList.Add(ParsedWorkbookMap[DocOrigin.Base]);
             xlsxList.Add(ParsedWorkbookMap[DocOrigin.Mine]);
-            xlsxList.Add(mergeArgs.ComparisonMode == ComparisonMode.ThreeWay ? ParsedWorkbookMap[DocOrigin.Theirs] : ParsedWorkbookMap[DocOrigin.Base]);
+            xlsxList.Add(pathViewModel.ComparisonMode == ComparisonMode.ThreeWay ? ParsedWorkbookMap[DocOrigin.Theirs] : ParsedWorkbookMap[DocOrigin.Base]);
 
             // 비교 대상 워크시트 목록을 추출
             List<String> allSheetNameList = new List<string>();
@@ -67,7 +64,7 @@ namespace XlsxMerge
                 SheetDiffResult newSheetResult = new SheetDiffResult();
                 SheetCompareResultList.Add(newSheetResult);
                 newSheetResult.WorksheetName = worksheetName;
-	            newSheetResult.MergeArgs = mergeArgs;
+	            newSheetResult.ComparisonMode = pathViewModel.ComparisonMode;
 
 				string diff3ResultText = null;
                 {

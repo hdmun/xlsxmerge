@@ -1,4 +1,5 @@
 ﻿using XlsxMerge.Extensions;
+using XlsxMerge.Model;
 using XlsxMerge.ViewModel;
 
 namespace XlsxMerge.View
@@ -77,8 +78,9 @@ namespace XlsxMerge.View
                 return;
             }
 
-            var argumentInfo = MergeArgumentInfo.Parse(resultArgs.ToArray());
-            var formMainDiff = new FormMainDiff(argumentInfo);
+            var argumentInfo = ProgramOptions.Parse(resultArgs.ToArray());
+            _pathViewModel.DiffPathModel = DiffPathModel.From(argumentInfo);
+            var formMainDiff = new FormMainDiff(_pathViewModel);
             formMainDiff.ShowDialog();
             // Close();
         }

@@ -58,7 +58,7 @@ namespace XlsxMerge
 			{
 				var candidateList = new List<WorksheetMergeMode>();
 
-				if (SheetDiffResult.MergeArgs.ComparisonMode == ComparisonMode.TwoWay)
+				if (SheetDiffResult.ComparisonMode == ComparisonMode.TwoWay)
 				{
 					// Two-way merge
 					// a1. Base있음 + Mine동일 = Unchanged
@@ -89,7 +89,7 @@ namespace XlsxMerge
 					}
 				}
 
-				if (SheetDiffResult.MergeArgs.ComparisonMode == ComparisonMode.ThreeWay)
+				if (SheetDiffResult.ComparisonMode == ComparisonMode.ThreeWay)
 				{
 					// Three-way merge
 					// Base있음 + Mine동일 + Theirs동일 = Unchanged
