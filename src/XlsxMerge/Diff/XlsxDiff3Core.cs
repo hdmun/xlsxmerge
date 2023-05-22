@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using XlsxMerge.Diff;
 using XlsxMerge.ViewModel;
+using XlsxMerge.Features;
 
 namespace XlsxMerge
 {
@@ -28,24 +29,24 @@ namespace XlsxMerge
         }
 
         public List<SheetDiffResult> SheetCompareResultList = new List<SheetDiffResult>();
-        public Dictionary<DocOrigin, ParsedXlsx> ParsedWorkbookMap = new Dictionary<DocOrigin, ParsedXlsx>();
+        public Dictionary<DocOrigin, ExcelFile> ParsedWorkbookMap = new();
 
         public void Run(PathViewModel pathViewModel)
         {
 			// 엑셀 파일을 해석.
-			using (var parsedXlsxGenerator = new ParsedXlsxGenerator())
+			using (var excelReader = new ExcelReader())
             {
-                ParsedWorkbookMap[DocOrigin.Base] = parsedXlsxGenerator.ParseXlsx(pathViewModel.BasePath);
-                ParsedWorkbookMap[DocOrigin.Mine] = parsedXlsxGenerator.ParseXlsx(pathViewModel.MinePath);
+                ParsedWorkbookMap[DocOrigin.Base] = excelReader.Read(pathViewModel.BasePath);
+                ParsedWorkbookMap[DocOrigin.Mine] = excelReader.Read(pathViewModel.MinePath);
                 if (pathViewModel.ComparisonMode == ComparisonMode.ThreeWay)
-                    ParsedWorkbookMap[DocOrigin.Theirs] = parsedXlsxGenerator.ParseXlsx(pathViewModel.TheirsPath);
+                    ParsedWorkbookMap[DocOrigin.Theirs] = excelReader.Read(pathViewModel.TheirsPath);
             }
 
 	        FakeBackgroundWorker.OnUpdateProgress("xlsx 파일 비교  [3단계 중 3단계]", "엑셀 문서 비교 중..");
             // diff3 의 file1/file2/file3 셋업.
 			// 순서는 base/mine/theirs 이며, two-way는 theirs 위치에 base 문서를 넣는다.
 			// 이렇게 하면 two-way에서 diff3 hunk status 가 Diff3HunkStatus.MineDiffers 로 표시된다.
-			var xlsxList = new List<ParsedXlsx>();
+			var xlsxList = new List<ExcelFile>();
             xlsxList.Add(ParsedWorkbookMap[DocOrigin.Base]);
             xlsxList.Add(ParsedWorkbookMap[DocOrigin.Mine]);
             xlsxList.Add(pathViewModel.ComparisonMode == ComparisonMode.ThreeWay ? ParsedWorkbookMap[DocOrigin.Theirs] : ParsedWorkbookMap[DocOrigin.Base]);
@@ -86,9 +87,9 @@ namespace XlsxMerge
             }
         }
 
-	    public Dictionary<DocOrigin, ParsedXlsx.Worksheet> GetParsedWorksheetData(string worksheetName)
+	    public Dictionary<DocOrigin, ExcelWorksheet> GetParsedWorksheetData(string worksheetName)
 	    {
-		    var result = new Dictionary<DocOrigin, ParsedXlsx.Worksheet>();
+		    var result = new Dictionary<DocOrigin, ExcelWorksheet>();
 		    foreach (var docOrigin in new[] {DocOrigin.Base, DocOrigin.Mine, DocOrigin.Theirs})
 		    {
 			    result[docOrigin] = null;
@@ -99,7 +100,7 @@ namespace XlsxMerge
 		    return result;
 	    }
 
-		private static List<String> getWorksheetLines(ParsedXlsx xlsxFile, String worksheetName)
+		private static List<String> getWorksheetLines(ExcelFile xlsxFile, String worksheetName)
         {
             var targetWorksheet = xlsxFile.Worksheets.Find(r => r.Name == worksheetName);
             if (targetWorksheet == null)

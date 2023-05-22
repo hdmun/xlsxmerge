@@ -35,7 +35,7 @@ namespace XlsxMerge
 			var unifiedColumnWidthList = new List<double>();
 			foreach (var eachWorksheet in parsedWorksheetData.Values)
 			{
-				if (eachWorksheet == null || eachWorksheet.GetRowCount() == 0)
+				if (eachWorksheet == null || eachWorksheet.RowCount == 0)
 					continue;
 
 				int elemToCopy = eachWorksheet.ColumnWidthList.Count - unifiedColumnWidthList.Count;
@@ -136,11 +136,11 @@ namespace XlsxMerge
 					dgvRow.DefaultCellStyle.Font = strikeoutFont;
 				dgvRow.Cells["source_line"].Value = sourceLineText;
 
-				if (refWorksheet.GetRowCount() == 0)
+				if (refWorksheet.RowCount == 0)
 					continue;
 
 
-				int maxColumn = refWorksheet.GetColumnCount();
+				int maxColumn = refWorksheet.ColumnCount;
 				for (int cellNumber = 1; cellNumber <= maxColumn; cellNumber++)
 				{
 					var currentCell = refWorksheet.Cell(rowNumber, cellNumber);

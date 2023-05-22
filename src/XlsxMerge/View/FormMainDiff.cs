@@ -422,7 +422,7 @@ namespace XlsxMerge.View
 
 
 			var worksheetBase = _xlsxMergeDecision.DiffResult.GetParsedWorksheetData(sheetResult.WorksheetName)[DocOrigin.Base];
-			var previewData = MergeResultPreviewData.GeneratePreviewData(getCurrentSheetDecision(), worksheetBase == null ? 0 : worksheetBase.GetRowCount(), checkBoxHideRemovedLines.Checked, checkBoxHideEqualLines.Checked);
+			var previewData = MergeResultPreviewData.GeneratePreviewData(getCurrentSheetDecision(), worksheetBase == null ? 0 : worksheetBase.RowCount, checkBoxHideRemovedLines.Checked, checkBoxHideEqualLines.Checked);
 			previewDataCache[sheetResult.WorksheetName] = previewData;
 			MergeResultPreviewer.RefreshDataGridViewContents(_xlsxMergeDecision, sheetDecision, dataGridView1, previewData);
 			UpdateDataGridViewColumnName();
