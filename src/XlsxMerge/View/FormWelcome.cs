@@ -43,6 +43,7 @@ namespace XlsxMerge.View
             textBoxPathMine.BindingText(_pathViewModel, nameof(_pathViewModel.MinePath));
             textBoxPathTheirs.BindingText(_pathViewModel, nameof(_pathViewModel.TheirsPath));
             textBoxPathResult.BindingText(_pathViewModel, nameof(_pathViewModel.ResultPath));
+            buttonStart.BindingEnabled(_pathViewModel, nameof(_pathViewModel.EnableDiffStart));
 
             previewCommandLine();
         }

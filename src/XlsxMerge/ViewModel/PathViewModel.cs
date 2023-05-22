@@ -23,14 +23,14 @@ public class PathViewModel : INotifyPropertyChanged
         var args = new List<string>
         {
             $"{Assembly.GetEntryAssembly()?.GetName().Name}.exe",
-            $"-b {BasePath.AddDoubleQuote()}",
-            $"-d {MinePath.AddDoubleQuote()}"
+            $"-b {BasePath}",
+            $"-d {MinePath}"
         };
         if (use3wayMerge)
-            args.Add($"-s {TheirsPath.AddDoubleQuote()}");
+            args.Add($"-s {TheirsPath}");
 
         if (!string.IsNullOrEmpty(ResultPath))
-            args.Add($"-r {ResultPath.AddDoubleQuote()}");
+            args.Add($"-r {ResultPath}");
 
         string resultArgs = string.Join(" ", args);
         if (resultArgs.Contains("\"\""))
@@ -48,6 +48,7 @@ public class PathViewModel : INotifyPropertyChanged
             OnPropertyChanged();
             OnPropertyChanged(nameof(BasePathLabelText));
             OnPropertyChanged(nameof(VisibleTheirsPath));
+            OnPropertyChanged(nameof(EnableDiffStart));
         }
     }
 
@@ -60,6 +61,7 @@ public class PathViewModel : INotifyPropertyChanged
             OnPropertyChanged();
             OnPropertyChanged(nameof(MinePathLabelText));
             OnPropertyChanged(nameof(VisibleTheirsPath));
+            OnPropertyChanged(nameof(EnableDiffStart));
         }
     }
 
@@ -84,6 +86,7 @@ public class PathViewModel : INotifyPropertyChanged
             OnPropertyChanged();
             OnPropertyChanged(nameof(ResultPathLabelText));
             OnPropertyChanged(nameof(VisibleResultPath));
+            OnPropertyChanged(nameof(EnableDiffStart));
         }
     }
 
@@ -115,6 +118,11 @@ public class PathViewModel : INotifyPropertyChanged
     public bool VisibleResultPath
     {
         get => string.IsNullOrEmpty(ResultPath) == false;
+    }
+
+    public bool EnableDiffStart
+    {
+        get => !string.IsNullOrEmpty(BasePath) && !string.IsNullOrEmpty(MinePath) && VisibleResultPath;
     }
 
     public ComparisonMode ComparisonMode
