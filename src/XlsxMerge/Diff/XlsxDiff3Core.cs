@@ -28,10 +28,9 @@ namespace XlsxMerge
             }
         }
 
-        public List<SheetDiffResult> SheetCompareResultList = new List<SheetDiffResult>();
         public Dictionary<DocOrigin, ExcelFile> ParsedWorkbookMap = new();
 
-        public void Run(PathViewModel pathViewModel)
+        public List<SheetDiffResult> Run(PathViewModel pathViewModel)
         {
 			// 엑셀 파일을 해석.
 			using (var excelReader = new ExcelReader())
@@ -59,11 +58,10 @@ namespace XlsxMerge
                         allSheetNameList.Add(sheetName);
 
             // 각 워크시트를 List<String>으로 변환 후 do diff3
-            SheetCompareResultList.Clear();
+            var compareResults = new List<SheetDiffResult>();
             foreach (var worksheetName in allSheetNameList)
             {
                 SheetDiffResult newSheetResult = new SheetDiffResult();
-                SheetCompareResultList.Add(newSheetResult);
                 newSheetResult.WorksheetName = worksheetName;
 	            newSheetResult.ComparisonMode = pathViewModel.ComparisonMode;
 
@@ -84,7 +82,10 @@ namespace XlsxMerge
                 }
 
                 newSheetResult.HunkList = parseDiff3Result(diff3ResultText);
+
+                compareResults.Add(newSheetResult);
             }
+            return compareResults;
         }
 
 	    public Dictionary<DocOrigin, ExcelWorksheet> GetParsedWorksheetData(string worksheetName)

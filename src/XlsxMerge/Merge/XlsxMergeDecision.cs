@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using XlsxMerge.Diff;
+using static XlsxMerge.XlsxDiff3Core;
 
 namespace XlsxMerge
 {
@@ -8,7 +9,7 @@ namespace XlsxMerge
 		public List<SheetMergeDecision> SheetMergeDecisionList;
 		public readonly XlsxDiff3Core DiffResult;
 
-		public XlsxMergeDecision(XlsxDiff3Core diffResult = null)
+		public XlsxMergeDecision(XlsxDiff3Core diffResult = null, List<SheetDiffResult> compareResults = null)
 		{
 			DiffResult = diffResult;
 			SheetMergeDecisionList = new List<SheetMergeDecision>();
@@ -16,8 +17,8 @@ namespace XlsxMerge
 			if (diffResult == null)
 				return;
 
-			foreach (var eachSheetCompareResult in diffResult.SheetCompareResultList)
-				SheetMergeDecisionList.Add(new SheetMergeDecision(eachSheetCompareResult));
+			foreach (var result in compareResults)
+				SheetMergeDecisionList.Add(new SheetMergeDecision(result));
 		}
 
 		public class SheetMergeDecision

@@ -92,11 +92,12 @@ namespace XlsxMerge.View
 
 			// diff3 진행
 			var diff3Data = new XlsxDiff3Core();
-			diff3Data.Run(_pathViewModel);
-			FakeBackgroundWorker.OnUpdateProgress("xlsx 파일 비교", "비교 완료. 기본 설정 진행 중..");
-			_xlsxMergeDecision = new XlsxMergeDecision(diff3Data);
+			var compareResults = diff3Data.Run(_pathViewModel);
 
-			foreach (var eachSheetResult in _xlsxMergeDecision.DiffResult.SheetCompareResultList)
+			FakeBackgroundWorker.OnUpdateProgress("xlsx 파일 비교", "비교 완료. 기본 설정 진행 중..");
+			_xlsxMergeDecision = new XlsxMergeDecision(diff3Data, compareResults);
+
+			foreach (var eachSheetResult in compareResults)
 			{
 				String sheetName = eachSheetResult.WorksheetName;
 
