@@ -53,10 +53,9 @@ namespace XlsxMerge.View
 
             labelPathResult.BindingVisible(_pathViewModel, nameof(_pathViewModel.VisibleResultPath));
             labelPathResult.BindingText(_pathViewModel, nameof(_pathViewModel.ResultPathLabelText));
+
             if (_pathViewModel.VisibleResultPath)
-            {
                 buttonSaveMergeResult.Text = "머지 결과 저장 후 닫기";
-            }
 
             panelTop.Height = labelPathResult.Bounds.Bottom;
 
@@ -79,13 +78,18 @@ namespace XlsxMerge.View
 			listViewWorksheets.Columns.Add("워크시트 이름", 150);
 			if (_pathViewModel.ComparisonMode == ComparisonMode.ThreeWay)
 				listViewWorksheets.Columns.Add("충돌", 50);
+
 			listViewWorksheets.Columns.Add("Mine (Dest/Curr)", 60);
 			if (_pathViewModel.ComparisonMode == ComparisonMode.ThreeWay)
 				listViewWorksheets.Columns.Add("Theirs (Src/Others)", 60);
 
 			// double-buffer
-			dataGridView1.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(dataGridView1, true, null);
-			splitContainerBottom.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(splitContainerBottom, true, null);
+			dataGridView1.GetType()?.
+				GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic)?.
+				SetValue(dataGridView1, true, null);
+			splitContainerBottom.GetType()?.
+				GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic)?.
+				SetValue(splitContainerBottom, true, null);
 
 			// progress box set-up
 			FakeBackgroundWorker.OnUpdateProgress = onUpdateProgress;
