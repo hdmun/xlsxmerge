@@ -183,40 +183,14 @@ namespace XlsxMerge
             return hunkInfoList;
         }
 
-	    private static string LaunchExternalDiff3Process(List<String> lines1, List<String> lines2, List<String> lines3)
+	    private static string LaunchExternalDiff3Process(List<string> lines1, List<string> lines2, List<string> lines3)
 	    {
-		    String tmp1 = Path.GetTempFileName();
-		    String tmp2 = Path.GetTempFileName();
-		    String tmp3 = Path.GetTempFileName();
+		    string tmp1 = Diff3Process.CreateTempFile(lines1.ToArray());
+		    string tmp2 = Diff3Process.CreateTempFile(lines2.ToArray());
+            string tmp3 = Diff3Process.CreateTempFile(lines3.ToArray());
 
-		    if (lines1 != null)
-			    File.WriteAllLines(tmp1, lines1);
-		    if (lines2 != null)
-			    File.WriteAllLines(tmp2, lines2);
-		    if (lines3 != null)
-			    File.WriteAllLines(tmp3, lines3);
-
-		    String diff3Result = null;
-		    ProcessStartInfo psi = new ProcessStartInfo()
-		    {
-			    FileName = Path.GetFullPath(@".\diff3.exe"),
-			    UseShellExecute = false,
-			    CreateNoWindow = true,
-			    RedirectStandardOutput = true,
-			    StandardOutputEncoding = Encoding.UTF8,
-			    Arguments = "\"" + tmp1 + "\" \"" + tmp2 + "\" \"" + tmp3 + "\""
-		    };
-		    psi.WorkingDirectory = Path.GetDirectoryName(psi.FileName);
-
-		    var p = Process.Start(psi);
-		    diff3Result = p.StandardOutput.ReadToEnd();
-		    p.WaitForExit();
-
-		    File.Delete(tmp1);
-		    File.Delete(tmp2);
-		    File.Delete(tmp3);
-
-		    return diff3Result;
+            var diffFiles = new string[] { tmp1, tmp2, tmp3 };
+		    return Diff3Process.Start(diffFiles);
 	    }
     }
 }
