@@ -43,23 +43,28 @@ namespace XlsxMerge
 
 	        FakeBackgroundWorker.OnUpdateProgress("xlsx 파일 비교  [3단계 중 3단계]", "엑셀 문서 비교 중..");
             // diff3 의 file1/file2/file3 셋업.
-			// 순서는 base/mine/theirs 이며, two-way는 theirs 위치에 base 문서를 넣는다.
-			// 이렇게 하면 two-way에서 diff3 hunk status 가 Diff3HunkStatus.MineDiffers 로 표시된다.
-			var xlsxList = new List<ExcelFile>();
-            xlsxList.Add(ParsedWorkbookMap[DocOrigin.Base]);
-            xlsxList.Add(ParsedWorkbookMap[DocOrigin.Mine]);
-            xlsxList.Add(pathViewModel.ComparisonMode == ComparisonMode.ThreeWay ? ParsedWorkbookMap[DocOrigin.Theirs] : ParsedWorkbookMap[DocOrigin.Base]);
+            // 순서는 base/mine/theirs 이며, two-way는 theirs 위치에 base 문서를 넣는다.
+            // 이렇게 하면 two-way에서 diff3 hunk status 가 Diff3HunkStatus.MineDiffers 로 표시된다.
+
+            var xlsxList = new List<ExcelFile>
+            {
+                ParsedWorkbookMap[DocOrigin.Base],
+                ParsedWorkbookMap[DocOrigin.Mine],
+                pathViewModel.ComparisonMode switch
+                {
+                    ComparisonMode.ThreeWay => ParsedWorkbookMap[DocOrigin.Theirs],
+                    _ => ParsedWorkbookMap[DocOrigin.Base]
+                }
+            };
 
             // 비교 대상 워크시트 목록을 추출
-            List<String> allSheetNameList = new List<string>();
-            foreach (var eachXlsx in xlsxList)
-                foreach (string sheetName in eachXlsx.Worksheets.Select(r => r.Name))
-                    if (allSheetNameList.Contains(sheetName) == false)
-                        allSheetNameList.Add(sheetName);
+            var sheetNameSet = xlsxList
+                .SelectMany(x => x.Worksheets.Select(y => y.Name))
+                .ToHashSet();
 
             // 각 워크시트를 List<String>으로 변환 후 do diff3
             var compareResults = new List<SheetDiffResult>();
-            foreach (var worksheetName in allSheetNameList)
+            foreach (var worksheetName in sheetNameSet)
             {
                 SheetDiffResult newSheetResult = new SheetDiffResult();
                 newSheetResult.WorksheetName = worksheetName;
@@ -88,17 +93,13 @@ namespace XlsxMerge
             return compareResults;
         }
 
-	    public Dictionary<DocOrigin, ExcelWorksheet> GetParsedWorksheetData(string worksheetName)
+	    public Dictionary<DocOrigin, ExcelWorksheet?> GetParsedWorksheetData(string worksheetName)
 	    {
-		    var result = new Dictionary<DocOrigin, ExcelWorksheet>();
-		    foreach (var docOrigin in new[] {DocOrigin.Base, DocOrigin.Mine, DocOrigin.Theirs})
-		    {
-			    result[docOrigin] = null;
-			    if (ParsedWorkbookMap.ContainsKey(docOrigin))
-				    result[docOrigin] = ParsedWorkbookMap[docOrigin].Worksheets.FirstOrDefault(r => r.Name == worksheetName);
-			}
-
-		    return result;
+            return ParsedWorkbookMap.ToDictionary(
+                x => x.Key,
+                x => x.Value.Worksheets
+                    .FirstOrDefault(y => y.Name == worksheetName)
+            );
 	    }
 
 		private static List<String> getWorksheetLines(ExcelFile xlsxFile, String worksheetName)
