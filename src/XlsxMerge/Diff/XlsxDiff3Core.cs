@@ -72,9 +72,9 @@ namespace XlsxMerge
 
 				string diff3ResultText = null;
                 {
-                    var lines1 = getWorksheetLines(xlsxList[0], worksheetName);
-                    var lines2 = getWorksheetLines(xlsxList[1], worksheetName);
-                    var lines3 = getWorksheetLines(xlsxList[2], worksheetName);
+                    var lines1 = xlsxList[0].GetTextLinesByWorksheetName(worksheetName);
+                    var lines2 = xlsxList[1].GetTextLinesByWorksheetName(worksheetName);
+                    var lines3 = xlsxList[2].GetTextLinesByWorksheetName(worksheetName);
 
                     if (lines1 != null)
                         newSheetResult.DocsContaining.Add(DocOrigin.Base);
@@ -101,23 +101,6 @@ namespace XlsxMerge
                     .FirstOrDefault(y => y.Name == worksheetName)
             );
 	    }
-
-		private static List<String> getWorksheetLines(ExcelFile xlsxFile, String worksheetName)
-        {
-            var targetWorksheet = xlsxFile.Worksheets.Find(r => r.Name == worksheetName);
-            if (targetWorksheet == null)
-                return null;
-
-            List<String> result = new List<string>();
-            foreach (var eachRow in targetWorksheet.Cells)
-            {
-                var columnList = eachRow.Select(r => r.ContentsForDiff3).ToList();
-                while (columnList.Count > 0 && columnList[columnList.Count - 1] == "")
-                    columnList.RemoveAt(columnList.Count - 1);
-                result.Add(JsonConvert.SerializeObject(columnList, Newtonsoft.Json.Formatting.None));
-            }
-            return result;
-        }
 
         private static List<SheetDiffResult.DiffHunkInfo> parseDiff3Result(String diff3ResultText)
         {
