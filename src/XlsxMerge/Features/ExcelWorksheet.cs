@@ -13,7 +13,7 @@ public class ExcelWorksheet
 
     public ExcelWorksheet(string name)
     {
-        Name = "";
+        Name = name;
         Cells = new(); // List<Row>
         ColumnWidthList = new();
     }
