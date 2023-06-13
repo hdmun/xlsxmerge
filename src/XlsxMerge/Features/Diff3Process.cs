@@ -24,7 +24,7 @@ public static class Diff3Process
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             StandardOutputEncoding = Encoding.UTF8,
-            Arguments = diffFiles.Aggregate((prev, current) => $"{prev} \"{current}\""),
+            Arguments = diffFiles.Aggregate("", (prev, current) => $"{prev} \"{current}\"").Trim(),
         };
         psi.WorkingDirectory = Path.GetDirectoryName(psi.FileName);
 
