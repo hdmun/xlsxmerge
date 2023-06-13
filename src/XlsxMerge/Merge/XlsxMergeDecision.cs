@@ -4,7 +4,7 @@ using static XlsxMerge.XlsxDiff3Core;
 
 namespace XlsxMerge
 {
-	class XlsxMergeDecision
+    class XlsxMergeDecision
 	{
 		public List<SheetMergeDecision> SheetMergeDecisionList;
 		public readonly XlsxDiff3Core DiffResult;
@@ -24,12 +24,12 @@ namespace XlsxMerge
 		public class SheetMergeDecision
 		{
 			public string WorksheetName;
-			public readonly XlsxDiff3Core.SheetDiffResult SheetDiffResult;
+			public readonly SheetDiffResult SheetDiffResult;
 			public WorksheetMergeMode MergeModeDecision;
 			public List<WorksheetMergeMode> MergeModeCandidates;
 			public List<HunkMergeDecision> HunkMergeDecisionList;
 
-			public SheetMergeDecision(XlsxDiff3Core.SheetDiffResult sheetDiffResult)
+			public SheetMergeDecision(SheetDiffResult sheetDiffResult)
 			{
 				SheetDiffResult = sheetDiffResult;
 				WorksheetName = SheetDiffResult.WorksheetName;
@@ -175,10 +175,10 @@ namespace XlsxMerge
 		public class HunkMergeDecision
 		{
 			public List<DocOrigin> DocMergeOrder = new List<DocOrigin>(); // null = Conflict 상태로 둡니다. Empty = 모두 삭제. 
-			public readonly XlsxDiff3Core.SheetDiffResult.DiffHunkInfo BaseHunkInfo;
+			public readonly DiffHunkInfo BaseHunkInfo;
 			public List<List<DocOrigin>> DocMergeOrderCandidates = null; // 이 Hunk에서 선택 가능한 document merge orders.
 
-			public HunkMergeDecision(XlsxDiff3Core.SheetDiffResult.DiffHunkInfo baseHunkInfo)
+			public HunkMergeDecision(DiffHunkInfo baseHunkInfo)
 			{
 				BaseHunkInfo = baseHunkInfo;
 				BuildDocMergeOrderCandidates();

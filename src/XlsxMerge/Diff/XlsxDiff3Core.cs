@@ -1,33 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
-using Newtonsoft.Json;
+﻿using System.Text.RegularExpressions;
 using XlsxMerge.Diff;
-using XlsxMerge.ViewModel;
 using XlsxMerge.Features;
+using XlsxMerge.ViewModel;
 
 namespace XlsxMerge
 {
     class XlsxDiff3Core
     {
-        public class SheetDiffResult
-        {
-	        public ComparisonMode ComparisonMode = ComparisonMode.Unknown;
-			public string WorksheetName = "";
-            public List<DocOrigin> DocsContaining = new List<DocOrigin>(); // 이 워크시트가 있는 문서.
-            public List<DiffHunkInfo> HunkList = new List<DiffHunkInfo>();
-
-            public class DiffHunkInfo
-            {
-                public Diff3HunkStatus hunkStatus;
-                public Dictionary<DocOrigin, RowRange> rowRangeMap = new Dictionary<DocOrigin, RowRange>();
-            }
-        }
-
         public Dictionary<DocOrigin, ExcelFile> ParsedWorkbookMap = new();
 
         public List<SheetDiffResult> Run(PathViewModel pathViewModel)
@@ -102,7 +81,7 @@ namespace XlsxMerge
             );
 	    }
 
-        private static List<SheetDiffResult.DiffHunkInfo> parseDiff3Result(String diff3ResultText)
+        private static List<DiffHunkInfo> parseDiff3Result(String diff3ResultText)
         {
             var regexLineInfo = new Regex("^([123]):([0-9,]+)([ac])$");
             var hunkStatusMap = new Dictionary<string, Diff3HunkStatus>()
@@ -119,16 +98,16 @@ namespace XlsxMerge
                 { "3", DocOrigin.Theirs },
             };
 
-            var hunkInfoList = new List<SheetDiffResult.DiffHunkInfo>();
+            var hunkInfoList = new List<DiffHunkInfo>();
 
-            SheetDiffResult.DiffHunkInfo curHunk = null;
+            DiffHunkInfo curHunk = null;
             StringReader sr = new StringReader(diff3ResultText);
             while (sr.Peek() != -1)
             {
                 var curLine = sr.ReadLine();
                 if (curLine.StartsWith("===="))
                 {
-                    curHunk = new SheetDiffResult.DiffHunkInfo();
+                    curHunk = new DiffHunkInfo();
                     hunkInfoList.Add(curHunk);
                     curHunk.hunkStatus = hunkStatusMap[curLine.Trim()];
                 }
