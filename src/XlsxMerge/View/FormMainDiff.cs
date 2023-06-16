@@ -128,7 +128,7 @@ namespace XlsxMerge.View
 			FakeBackgroundWorker.OnUpdateProgress(null);
 		}
 
-		private Tuple<string, Color> GetSheetModificationSummary(XlsxDiff3Core.SheetDiffResult eachSheetResult, DocOrigin targetDoc)
+		private Tuple<string, Color> GetSheetModificationSummary(SheetDiffResult eachSheetResult, DocOrigin targetDoc)
 		{
 			if (eachSheetResult.DocsContaining.Contains(DocOrigin.Base) == true && eachSheetResult.DocsContaining.Contains(targetDoc) == false)
 				return new Tuple<string, Color>("삭제됨", Color.PaleVioletRed);
