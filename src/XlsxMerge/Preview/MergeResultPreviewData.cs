@@ -8,9 +8,9 @@ namespace XlsxMerge
 {
 	class MergeResultPreviewData
 	{
-		public List<String> RowInfoList = new List<string>();
-		public List<int> HunkStartsPosList = new List<int>(); // diff hunk navigate에 사용
-		public List<int> HunkEndsPosList = new List<int>(); // diff hunk navigate에 사용
+		public readonly List<String> RowInfoList = new List<string>();
+		public readonly List<int> HunkStartsPosList = new List<int>(); // diff hunk navigate에 사용
+		public readonly List<int> HunkEndsPosList = new List<int>(); // diff hunk navigate에 사용
 
 		public int GetHunkIdxByRowNumber(int dataGridRowNumber)
 		{

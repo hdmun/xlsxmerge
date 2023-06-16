@@ -7,7 +7,7 @@ namespace XlsxMerge
 {
     class XlsxDiff3Core
     {
-        public Dictionary<DocOrigin, ExcelFile> ParsedWorkbookMap = new();
+        public readonly Dictionary<DocOrigin, ExcelFile> ParsedWorkbookMap = new();
 
         public List<SheetDiffResult> Run(PathViewModel pathViewModel)
         {
@@ -45,9 +45,7 @@ namespace XlsxMerge
             var compareResults = new List<SheetDiffResult>();
             foreach (var worksheetName in sheetNameSet)
             {
-                SheetDiffResult newSheetResult = new SheetDiffResult();
-                newSheetResult.WorksheetName = worksheetName;
-	            newSheetResult.ComparisonMode = pathViewModel.ComparisonMode;
+                SheetDiffResult newSheetResult = new SheetDiffResult(worksheetName, pathViewModel.ComparisonMode);
 
 				string diff3ResultText = null;
                 {
@@ -107,9 +105,11 @@ namespace XlsxMerge
                 var curLine = sr.ReadLine();
                 if (curLine.StartsWith("===="))
                 {
-                    curHunk = new DiffHunkInfo();
+                    var text = curLine.Trim();
+                    var hunStatus = hunkStatusMap[text];
+                    curHunk = new DiffHunkInfo(hunStatus);
                     hunkInfoList.Add(curHunk);
-                    curHunk.hunkStatus = hunkStatusMap[curLine.Trim()];
+                    continue;
                 }
 
                 Match m = regexLineInfo.Match(curLine);

@@ -2,8 +2,15 @@
 
 public class SheetDiffResult
 {
-    public ComparisonMode ComparisonMode = ComparisonMode.Unknown;
-    public string WorksheetName = "";
-    public List<DocOrigin> DocsContaining = new List<DocOrigin>(); // 이 워크시트가 있는 문서.
-    public List<DiffHunkInfo> HunkList = new List<DiffHunkInfo>();
+    public readonly string WorksheetName;
+    public readonly ComparisonMode ComparisonMode;
+    public readonly List<DocOrigin> DocsContaining; // 이 워크시트가 있는 문서.
+    public List<DiffHunkInfo> HunkList = new();
+
+    public SheetDiffResult(string worksheetName, ComparisonMode comparisonMode)
+    {
+        WorksheetName = worksheetName;
+        ComparisonMode = comparisonMode;
+        DocsContaining = new();
+    }
 }
