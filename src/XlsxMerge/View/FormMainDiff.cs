@@ -116,37 +116,19 @@ namespace XlsxMerge.View
 						lvi.SubItems.Add("");
 				}
 
-				var kvpMine = GetSheetModificationSummary(eachSheetResult, DocOrigin.Mine);
-				lvi.SubItems.Add(kvpMine.Item1).BackColor = kvpMine.Item2;
-				if (_pathViewModel.ComparisonMode == ComparisonMode.ThreeWay)
-				{
-					var kvpTheirs = GetSheetModificationSummary(eachSheetResult, DocOrigin.Theirs);
-					lvi.SubItems.Add(kvpTheirs.Item1).BackColor = kvpTheirs.Item2;
-				}
-			}
+                var modificationMine = eachSheetResult.GetModificationSummary(DocOrigin.Mine);
+                var subItem = lvi.SubItems.Add(modificationMine.Name);
+                subItem.BackColor = modificationMine.Color;
+
+                if (_pathViewModel.ComparisonMode == ComparisonMode.ThreeWay)
+                {
+                    var modificationTheirs = eachSheetResult.GetModificationSummary(DocOrigin.Theirs);
+                    subItem = lvi.SubItems.Add(modificationTheirs.Name);
+                    subItem.BackColor = modificationTheirs.Color;
+                }
+            }
 
 			FakeBackgroundWorker.OnUpdateProgress(null);
-		}
-
-		private Tuple<string, Color> GetSheetModificationSummary(SheetDiffResult eachSheetResult, DocOrigin targetDoc)
-		{
-			if (eachSheetResult.DocsContaining.Contains(DocOrigin.Base) == true && eachSheetResult.DocsContaining.Contains(targetDoc) == false)
-				return new Tuple<string, Color>("삭제됨", Color.PaleVioletRed);
-			if (eachSheetResult.DocsContaining.Contains(DocOrigin.Base) == false && eachSheetResult.DocsContaining.Contains(targetDoc) == true)
-				return new Tuple<string, Color>("추가됨", Color.PaleGreen);
-			if (eachSheetResult.HunkList.Find(r => r.hunkStatus == Diff3HunkStatus.Conflict) != null)
-				return new Tuple<string, Color>("수정됨", Color.LightYellow);
-			if (eachSheetResult.HunkList.Find(r => r.hunkStatus == Diff3HunkStatus.BaseDiffers) != null)
-				return new Tuple<string, Color>("수정됨", Color.LightYellow);
-
-			Diff3HunkStatus targetDocDiffers = Diff3HunkStatus.Conflict;
-			if (targetDoc == DocOrigin.Mine)
-				targetDocDiffers = Diff3HunkStatus.MineDiffers;
-			if (targetDoc == DocOrigin.Theirs)
-				targetDocDiffers = Diff3HunkStatus.TheirsDiffers;
-			if (eachSheetResult.HunkList.Find(r => r.hunkStatus == targetDocDiffers) != null)
-				return new Tuple<string, Color>("수정됨", Color.LightYellow);
-			return new Tuple<string, Color>("같음", Color.White);
 		}
 
 		private void listViewWorksheets_SelectedIndexChanged(object sender, EventArgs e)
