@@ -18,7 +18,7 @@ namespace XlsxMerge
             if (args.Length > 1)
             {
                 argumentInfo = ProgramOptions.Parse(args);
-                if (argumentInfo.ComparisonMode == ComparisonMode.Unknown)
+                if (argumentInfo == null || argumentInfo?.ComparisonMode == ComparisonMode.Unknown)
                 {
                     argumentInfo = null;
                     MessageBox.Show("명령줄 인수에 잘못되거나 누락된 값이 있습니다.");
