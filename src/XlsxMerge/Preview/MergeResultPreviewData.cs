@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using XlsxMerge.Merge;
 
 namespace XlsxMerge
 {
@@ -22,7 +23,7 @@ namespace XlsxMerge
 			return candidateHunkIdx;
 		}
 
-		public static MergeResultPreviewData GeneratePreviewData(XlsxMergeDecision.SheetMergeDecision sheetDecision,
+		public static MergeResultPreviewData GeneratePreviewData(SheetMergeDecision sheetDecision,
 			int worksheetBaseRowCount, bool hideDeletedLines, bool hideEqualLines)
 		{
 			if (sheetDecision == null)

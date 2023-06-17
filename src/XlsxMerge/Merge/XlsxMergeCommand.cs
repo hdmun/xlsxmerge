@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using XlsxMerge.Merge;
 
 namespace XlsxMerge
 {
@@ -59,7 +60,7 @@ namespace XlsxMerge
 			}
 		}
 
-		private int AddRowCopyCommand(DocOrigin docOriginSource, string worksheetName, int rowNumberInsertAt, XlsxMergeDecision.HunkMergeDecision hunk)
+		private int AddRowCopyCommand(DocOrigin docOriginSource, string worksheetName, int rowNumberInsertAt, HunkMergeDecision hunk)
 		{
 			var rowRange = hunk.BaseHunkInfo.rowRangeMap[docOriginSource];
 			if (docOriginSource != _docOriginMergeInto && rowRange.RowCount > 0)
@@ -67,7 +68,7 @@ namespace XlsxMerge
 			return rowNumberInsertAt + rowRange.RowCount;
 		}
 
-		public void ProcessMergeDecision(XlsxMergeDecision.SheetMergeDecision sheetMergeDecision)
+		public void ProcessMergeDecision(SheetMergeDecision sheetMergeDecision)
 		{
 			// 맨 끝 변경사항부터 첫 변경사항으로 적용합니다.
 			// 이 방법을 사용할 경우 행 추가/삭제로 인한 줄 번호 재계산을 할 필요가 없어집니다.

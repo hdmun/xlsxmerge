@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Windows.Forms;
+﻿using XlsxMerge.Merge;
 
 namespace XlsxMerge
 {
-	class MergeResultPreviewer
+    class MergeResultPreviewer
 	{
-
 		public static void RefreshDataGridViewContents(XlsxMergeDecision xlsxMergeDecision,
-			XlsxMergeDecision.SheetMergeDecision sheetMergeDecision,
+			SheetMergeDecision sheetMergeDecision,
 			DataGridView dataGridView,
 			MergeResultPreviewData previewData)
 		{

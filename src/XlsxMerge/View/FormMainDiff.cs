@@ -12,6 +12,7 @@ using XlsxMerge;
 using XlsxMerge.Extensions;
 using XlsxMerge.Diff;
 using XlsxMerge.ViewModel;
+using XlsxMerge.Merge;
 
 namespace XlsxMerge.View
 {
@@ -34,7 +35,7 @@ namespace XlsxMerge.View
             _diffViewModel = diffViewModel;
         }
 
-		XlsxMergeDecision _xlsxMergeDecision = new XlsxMergeDecision();
+		XlsxMergeDecision _xlsxMergeDecision;
 		Dictionary<String, MergeResultPreviewData> previewDataCache = new Dictionary<string, MergeResultPreviewData>();
 		public bool MergeSuccessful = false;
 
@@ -376,7 +377,7 @@ namespace XlsxMerge.View
 				HighlightFocusedHunk();
 		}
 
-		private XlsxMergeDecision.SheetMergeDecision getCurrentSheetDecision()
+		private SheetMergeDecision getCurrentSheetDecision()
 		{
 			int selectedWorksheetIndex = listViewWorksheets.SelectedIndices.Count > 0 ? listViewWorksheets.SelectedIndices[0] : -1;
 			if (selectedWorksheetIndex < 0)
