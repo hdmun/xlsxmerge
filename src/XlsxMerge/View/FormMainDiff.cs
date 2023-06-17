@@ -102,29 +102,35 @@ namespace XlsxMerge.View
 			FakeBackgroundWorker.OnUpdateProgress("xlsx 파일 비교", "비교 완료. 기본 설정 진행 중..");
 			_xlsxMergeDecision = new XlsxMergeDecision(diff3Data, compareResults);
 
-			foreach (var eachSheetResult in compareResults)
-			{
-				String sheetName = eachSheetResult.WorksheetName;
+            var comparisonModeForResult = _pathViewModel.ComparisonMode;
+            foreach (var eachSheetResult in compareResults)
+            {
+                string sheetName = eachSheetResult.WorksheetName;
 
-				var lvi = listViewWorksheets.Items.Add(sheetName);
-				lvi.UseItemStyleForSubItems = false;
+                var listViewItem = listViewWorksheets.Items.Add(sheetName);
+                listViewItem.UseItemStyleForSubItems = false;
 
-				if (_pathViewModel.ComparisonMode == ComparisonMode.ThreeWay)
-				{
-					if (eachSheetResult.HunkList.Find(r => r.hunkStatus == Diff3HunkStatus.Conflict) != null)
-						lvi.SubItems.Add("발생").BackColor = Color.Gold;
-					else
-						lvi.SubItems.Add("");
-				}
+                if (comparisonModeForResult == ComparisonMode.ThreeWay)
+                {
+                    if (eachSheetResult.HunkList.Any(r => r.hunkStatus == Diff3HunkStatus.Conflict))
+                    {
+                        var conflictSubItem = listViewItem.SubItems.Add("발생");
+                        conflictSubItem.BackColor = Color.Gold;
+                    }
+                    else
+                    {
+                        listViewItem.SubItems.Add("");
+                    }
+                }
 
                 var modificationMine = eachSheetResult.GetModificationSummary(DocOrigin.Mine);
-                var subItem = lvi.SubItems.Add(modificationMine.Name);
+                var subItem = listViewItem.SubItems.Add(modificationMine.Name);
                 subItem.BackColor = modificationMine.Color;
 
-                if (_pathViewModel.ComparisonMode == ComparisonMode.ThreeWay)
+                if (comparisonModeForResult == ComparisonMode.ThreeWay)
                 {
                     var modificationTheirs = eachSheetResult.GetModificationSummary(DocOrigin.Theirs);
-                    subItem = lvi.SubItems.Add(modificationTheirs.Name);
+                    subItem = listViewItem.SubItems.Add(modificationTheirs.Name);
                     subItem.BackColor = modificationTheirs.Color;
                 }
             }
