@@ -81,7 +81,8 @@ namespace XlsxMerge.View
 
             var argumentInfo = ProgramOptions.Parse(resultArgs.ToArray());
             _pathViewModel.DiffPathModel = DiffPathModel.From(argumentInfo);
-            var formMainDiff = new FormMainDiff(_pathViewModel);
+            var diffViewModel = new DiffViewModel();
+            var formMainDiff = new FormMainDiff(_pathViewModel, diffViewModel);
             formMainDiff.ShowDialog();
             // Close();
         }

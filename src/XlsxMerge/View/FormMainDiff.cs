@@ -15,11 +15,12 @@ using XlsxMerge.ViewModel;
 
 namespace XlsxMerge.View
 {
-	public partial class FormMainDiff : Form
+    public partial class FormMainDiff : Form
 	{
 		private readonly PathViewModel _pathViewModel;
+        private readonly DiffViewModel _diffViewModel;
 
-        public FormMainDiff(PathViewModel pathViewModel)
+        public FormMainDiff(PathViewModel pathViewModel, DiffViewModel diffViewModel)
 		{
 			InitializeComponent();
 
@@ -30,7 +31,8 @@ namespace XlsxMerge.View
             labelPathResult.BackColor = ColorScheme.DiffHunk;
 
             _pathViewModel = pathViewModel;
-		}
+            _diffViewModel = diffViewModel;
+        }
 
 		XlsxMergeDecision _xlsxMergeDecision = new XlsxMergeDecision();
 		Dictionary<String, MergeResultPreviewData> previewDataCache = new Dictionary<string, MergeResultPreviewData>();
@@ -75,13 +77,12 @@ namespace XlsxMerge.View
 
             // initialize listViewWorksheets columns
             listViewWorksheets.Clear();
-			listViewWorksheets.Columns.Add("워크시트 이름", 150);
-			if (_pathViewModel.ComparisonMode == ComparisonMode.ThreeWay)
-				listViewWorksheets.Columns.Add("충돌", 50);
-
-			listViewWorksheets.Columns.Add("Mine (Dest/Curr)", 60);
-			if (_pathViewModel.ComparisonMode == ComparisonMode.ThreeWay)
-				listViewWorksheets.Columns.Add("Theirs (Src/Others)", 60);
+            var columns = _diffViewModel.GetWorksheetColumns(_pathViewModel.ComparisonMode);
+            foreach (var column in columns)
+            {
+                listViewWorksheets.Columns.Add(column);
+            }
+            listViewWorksheets.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
 
 			// double-buffer
 			dataGridView1.GetType()?.

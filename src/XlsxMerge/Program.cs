@@ -35,7 +35,8 @@ namespace XlsxMerge
             if (argumentInfo != null)
             {
                 pathViewModel.DiffPathModel = DiffPathModel.From(argumentInfo);
-                var formMainDiff = new FormMainDiff(pathViewModel);
+                var diffViewModel = new DiffViewModel();
+                var formMainDiff = new FormMainDiff(pathViewModel, diffViewModel);
                 Application.Run(formMainDiff);
                 if (formMainDiff.MergeSuccessful)
                     return 0;
