@@ -2,7 +2,7 @@
 using XlsxMerge.Extensions;
 using Excel = Microsoft.Office.Interop.Excel;
 
-namespace XlsxMerge.Features;
+namespace XlsxMerge.Features.Excels;
 
 public class ExcelReader : IDisposable
 {
@@ -72,7 +72,7 @@ public class ExcelReader : IDisposable
 
     public void Dispose()
     {
-        if (_application != null )
+        if (_application != null)
         {
             _application.Quit();
             Marshal.ReleaseComObject(_application);

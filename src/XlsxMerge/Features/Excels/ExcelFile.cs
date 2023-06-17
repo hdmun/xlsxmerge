@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace XlsxMerge.Features;
+namespace XlsxMerge.Features.Excels;
 
 public class ExcelFile
 {

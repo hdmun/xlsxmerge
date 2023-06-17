@@ -1,4 +1,4 @@
-﻿namespace XlsxMerge.Features;
+﻿namespace XlsxMerge.Features.Excels;
 
 public class ExcelWorksheet
 {

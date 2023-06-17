@@ -1,5 +1,5 @@
 ﻿using System.Runtime.InteropServices;
-using XlsxMerge.Features;
+using XlsxMerge.Features.Excels;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace XlsxMerge.Extensions;
