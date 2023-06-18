@@ -13,6 +13,7 @@ using XlsxMerge.Extensions;
 using XlsxMerge.Diff;
 using XlsxMerge.ViewModel;
 using XlsxMerge.Merge;
+using XlsxMerge.Features.Diffs;
 
 namespace XlsxMerge.View
 {

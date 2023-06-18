@@ -1,4 +1,6 @@
-﻿namespace XlsxMerge.Extensions;
+﻿using XlsxMerge.Features.Diffs;
+
+namespace XlsxMerge.Extensions;
 
 public static class DisplayTextExtension
 {

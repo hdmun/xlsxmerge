@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using XlsxMerge.Diff;
 using XlsxMerge.Features;
+using XlsxMerge.Features.Diffs;
 using XlsxMerge.Features.Excels;
 using XlsxMerge.ViewModel;
 

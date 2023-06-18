@@ -19,13 +19,6 @@ namespace XlsxMerge
 		Conflict, // mine + theirs 각각 수정점이 있다.
 	}
 
-	public enum DocOrigin
-    {
-        Base,
-        Mine, // mine = destination = current
-        Theirs, // theirs = source = others
-    }
-
 	public enum WorksheetMergeMode
 	{
 		Unchanged,

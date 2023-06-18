@@ -1,4 +1,5 @@
-﻿using XlsxMerge.Merge;
+﻿using XlsxMerge.Features.Diffs;
+using XlsxMerge.Merge;
 
 namespace XlsxMerge
 {
