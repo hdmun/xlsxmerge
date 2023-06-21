@@ -79,7 +79,7 @@ namespace XlsxMerge.View
 
             // initialize listViewWorksheets columns
             listViewWorksheets.Clear();
-            var columns = _diffViewModel.GetWorksheetColumns(_pathViewModel.ComparisonMode);
+            var columns = _pathViewModel.ComparisonMode.GetWorksheetColumns();
             foreach (var column in columns)
             {
                 listViewWorksheets.Columns.Add(column);
