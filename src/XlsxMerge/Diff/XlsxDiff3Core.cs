@@ -9,7 +9,7 @@ namespace XlsxMerge
 {
     class XlsxDiff3Core
     {
-        public readonly Dictionary<DocOrigin, ExcelFile> ParsedWorkbookMap = new();
+        private readonly Dictionary<DocOrigin, ExcelFile> ParsedWorkbookMap = new();
 
         public List<SheetDiffResult> Run(PathViewModel pathViewModel)
         {
@@ -65,7 +65,7 @@ namespace XlsxMerge
                     diff3ResultText = LaunchExternalDiff3Process(lines1, lines2, lines3);
                 }
 
-                newSheetResult.HunkList = parseDiff3Result(diff3ResultText);
+                newSheetResult.HunkList = new Diff3Parser().Parse(diff3ResultText);
 
                 compareResults.Add(newSheetResult);
             }
@@ -80,73 +80,6 @@ namespace XlsxMerge
                     .FirstOrDefault(y => y.Name == worksheetName)
             );
 	    }
-
-        private static List<DiffHunkInfo> parseDiff3Result(String diff3ResultText)
-        {
-            var regexLineInfo = new Regex("^([123]):([0-9,]+)([ac])$");
-            var hunkStatusMap = new Dictionary<string, Diff3HunkStatus>()
-            {
-                { "====", Diff3HunkStatus.Conflict},
-                { "====1", Diff3HunkStatus.BaseDiffers},
-                { "====2", Diff3HunkStatus.MineDiffers},
-                { "====3", Diff3HunkStatus.TheirsDiffers}
-            };
-            var FileOrderMap = new Dictionary<string, DocOrigin>()
-            {
-                { "1", DocOrigin.Base },
-                { "2", DocOrigin.Mine },
-                { "3", DocOrigin.Theirs },
-            };
-
-            var hunkInfoList = new List<DiffHunkInfo>();
-
-            DiffHunkInfo curHunk = null;
-            StringReader sr = new StringReader(diff3ResultText);
-            while (sr.Peek() != -1)
-            {
-                var curLine = sr.ReadLine();
-                if (curLine.StartsWith("===="))
-                {
-                    var text = curLine.Trim();
-                    var hunStatus = hunkStatusMap[text];
-                    curHunk = new DiffHunkInfo(hunStatus);
-                    hunkInfoList.Add(curHunk);
-                    continue;
-                }
-
-                Match m = regexLineInfo.Match(curLine);
-                if (m.Success == false)
-                    continue;
-
-                string fileIndex = m.Groups[1].Value;
-                string[] rangeToken = m.Groups[2].Value.Split(new char[] { ',' });
-                string command = m.Groups[3].Value;
-
-                RowRange rowRangeValue = new RowRange();
-                rowRangeValue.RowNumber = int.Parse(rangeToken[0]);
-                rowRangeValue.RowCount = 0;
-
-                if (command == "c")
-                {
-                    rowRangeValue.RowCount = 1;
-                    if (rangeToken.Length > 1)
-                        rowRangeValue.RowCount = int.Parse(rangeToken[1]) - rowRangeValue.RowNumber + 1;
-                }
-	            if (command == "a")
-	            {
-					// diffutils 설명에 따르면 : 'FILE:La' This hunk appears after line L of file FILE, and contains no lines in that file. 
-					// 'After'이므로, RowNumber를 1 더해주고 RowCount를 0으로 한다.
-					rowRangeValue.RowNumber = int.Parse(rangeToken[0]) + 1;
-		            rowRangeValue.RowCount = 0;
-				}
-
-				DocOrigin rowRangeDoc = FileOrderMap[fileIndex];
-                curHunk.rowRangeMap[rowRangeDoc] = rowRangeValue;
-            }
-            sr.Dispose();
-
-            return hunkInfoList;
-        }
 
 	    private static string LaunchExternalDiff3Process(List<string> lines1, List<string> lines2, List<string> lines3)
 	    {
