@@ -1,19 +1,26 @@
-﻿using XlsxMerge.Features.Diffs;
+﻿using System.Collections.Immutable;
+using XlsxMerge.Features.Diffs;
 
 namespace XlsxMerge.Diff;
 
 public class SheetDiffResult
 {
+    public static SheetDiffResult Of(string worksheetName, ComparisonMode comparisonMode, ImmutableHashSet<DocOrigin> docsContaining, List<DiffHunkInfo> hunkList)
+    {
+        return new SheetDiffResult(worksheetName, comparisonMode, docsContaining, hunkList);
+    }
+
     public readonly string WorksheetName;
     public readonly ComparisonMode ComparisonMode;
-    public readonly List<DocOrigin> DocsContaining; // 이 워크시트가 있는 문서.
-    public List<DiffHunkInfo> HunkList = new();
+    public readonly ImmutableHashSet<DocOrigin> DocsContaining; // 이 워크시트가 있는 문서.
+    public readonly List<DiffHunkInfo> HunkList;
 
-    public SheetDiffResult(string worksheetName, ComparisonMode comparisonMode)
+    private SheetDiffResult(string worksheetName, ComparisonMode comparisonMode, ImmutableHashSet<DocOrigin> docsContaining, List<DiffHunkInfo> hunkList)
     {
         WorksheetName = worksheetName;
         ComparisonMode = comparisonMode;
-        DocsContaining = new();
+        DocsContaining = docsContaining;
+        HunkList = hunkList;
     }
 
     public ModificationStateModel GetModificationSummary(DocOrigin targetDoc)

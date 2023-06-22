@@ -1,4 +1,5 @@
-﻿using XlsxMerge.Diff;
+﻿using System.Collections.Immutable;
+using XlsxMerge.Diff;
 using XlsxMerge.Features;
 using XlsxMerge.Features.Diffs;
 using XlsxMerge.Features.Excels;
@@ -21,30 +22,30 @@ namespace XlsxMerge
                 .SelectMany(x => x.Worksheets.Select(y => y.Name))
                 .ToHashSet();
 
-            var docOrigins = Enum.GetValues<DocOrigin>();
+            var docOriginEnums = Enum.GetValues<DocOrigin>();
 
             // 각 워크시트를 List<String>으로 변환 후 do diff3
             var compareResults = new List<SheetDiffResult>();
             foreach (var worksheetName in sheetNameSet)
             {
-                SheetDiffResult newSheetResult = new SheetDiffResult(worksheetName, pathViewModel.ComparisonMode);
-
-                var textLinesByOrigin = docOrigins.ToDictionary(
+                var textLinesByOrigin = docOriginEnums.ToDictionary(
                     x => x,
                     x => ParsedWorkbookMap[x].GetTextLinesByWorksheetName(worksheetName)
                 );
-                foreach (var (docOrigin, textLine) in textLinesByOrigin.Where(x => x.Value != null))
-                {
-                    newSheetResult.DocsContaining.Add(docOrigin);
-                }
+
+                var containDocs = textLinesByOrigin.Where(x => x.Value != null)
+                    .Select(x => x.Key)
+                    .ToImmutableHashSet();
 
                 var baseTextLines = textLinesByOrigin[DocOrigin.Base];
                 var mineTextLines = textLinesByOrigin[DocOrigin.Mine];
                 var theirsTextLines = textLinesByOrigin[DocOrigin.Theirs];
                 string diff3ResultText = LaunchExternalDiff3Process(baseTextLines, mineTextLines, theirsTextLines);
- 
-                newSheetResult.HunkList = new Diff3Parser().Parse(diff3ResultText);
 
+                var diff3Parser = new Diff3Parser();
+                var parsedHunkList = diff3Parser.Parse(diff3ResultText);
+
+                var newSheetResult = SheetDiffResult.Of(worksheetName, pathViewModel.ComparisonMode, containDocs, parsedHunkList);
                 compareResults.Add(newSheetResult);
             }
             return compareResults;
