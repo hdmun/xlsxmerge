@@ -5,11 +5,11 @@ namespace XlsxMerge.Merge;
 
 public class SheetMergeDecision
 {
-    public string WorksheetName;
+    public readonly string WorksheetName;
     public readonly SheetDiffResult SheetDiffResult;
     public WorksheetMergeMode MergeModeDecision;
-    public List<WorksheetMergeMode> MergeModeCandidates;
-    public List<HunkMergeDecision> HunkMergeDecisionList;
+    public readonly List<WorksheetMergeMode> MergeModeCandidates;
+    public readonly List<HunkMergeDecision> HunkMergeDecisionList;
 
     public SheetMergeDecision(SheetDiffResult sheetDiffResult)
     {
