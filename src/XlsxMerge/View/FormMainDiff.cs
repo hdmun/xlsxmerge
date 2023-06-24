@@ -160,16 +160,7 @@ namespace XlsxMerge.View
 
 		private void buttonSaveMergeResult_Click(object sender, EventArgs e)
 		{
-			int unResolvedConflictCount = 0;
-			foreach (var dc in _xlsxMergeDecision.SheetMergeDecisionList)
-			{
-				if (dc.MergeModeDecision != WorksheetMergeMode.Merge)
-					continue;
-				foreach (var hunkDc in dc.HunkMergeDecisionList)
-					if (hunkDc.DocMergeOrder == null)
-						unResolvedConflictCount++;
-			}
-
+			int unResolvedConflictCount = _xlsxMergeDecision.CalcUnResolvedConflictCount();
 			if (unResolvedConflictCount > 0)
 			{
 				if (MessageBox.Show($"충돌 상태로 둔 변경 지점이 {unResolvedConflictCount}곳 있습니다. 이 상태로 결과를 저장할까요?", "충돌 상태",
