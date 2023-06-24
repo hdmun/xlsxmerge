@@ -1,4 +1,4 @@
-﻿namespace XlsxMerge.Diff;
+﻿namespace XlsxMerge.Model;
 
 public class ModificationStateModel
 {
