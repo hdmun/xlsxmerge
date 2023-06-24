@@ -40,7 +40,7 @@
 			this.splitContainerBottom = new System.Windows.Forms.SplitContainer();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.listViewWorksheets = new System.Windows.Forms.ListView();
-			this.label1 = new System.Windows.Forms.Label();
+			this.labelWorksheetList = new System.Windows.Forms.Label();
 			this.textBox1 = new System.Windows.Forms.TextBox();
 			this.label4 = new System.Windows.Forms.Label();
 			this.dataGridView1 = new System.Windows.Forms.DataGridView();
@@ -60,7 +60,7 @@
 			this.labelCurrentWorksheetMergeMode = new System.Windows.Forms.Label();
 			this.linkLabelChangeWorksheetMergeMode = new System.Windows.Forms.LinkLabel();
 			this.label5 = new System.Windows.Forms.Label();
-			this.label2 = new System.Windows.Forms.Label();
+			this.labelSelectWorksheet = new System.Windows.Forms.Label();
 			this.panel3 = new System.Windows.Forms.Panel();
 			this.buttonCopyTableContents = new System.Windows.Forms.Button();
 			this.checkBoxHideRemovedLines = new System.Windows.Forms.CheckBox();
@@ -202,7 +202,7 @@
 			// splitContainer1.Panel1
 			// 
 			this.splitContainer1.Panel1.Controls.Add(this.listViewWorksheets);
-			this.splitContainer1.Panel1.Controls.Add(this.label1);
+			this.splitContainer1.Panel1.Controls.Add(this.labelWorksheetList);
 			// 
 			// splitContainer1.Panel2
 			// 
@@ -228,13 +228,13 @@
 			// 
 			// label1
 			// 
-			this.label1.BackColor = System.Drawing.Color.Lavender;
-			this.label1.Dock = System.Windows.Forms.DockStyle.Top;
-			this.label1.Location = new System.Drawing.Point(0, 0);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(330, 15);
-			this.label1.TabIndex = 1;
-			this.label1.Text = "워크시트 목록";
+			this.labelWorksheetList.BackColor = System.Drawing.Color.Lavender;
+			this.labelWorksheetList.Dock = System.Windows.Forms.DockStyle.Top;
+			this.labelWorksheetList.Location = new System.Drawing.Point(0, 0);
+			this.labelWorksheetList.Name = "labelWorksheetList";
+			this.labelWorksheetList.Size = new System.Drawing.Size(330, 15);
+			this.labelWorksheetList.TabIndex = 1;
+			this.labelWorksheetList.Text = "워크시트 목록";
 			// 
 			// textBox1
 			// 
@@ -410,7 +410,7 @@
 			this.panel1.Controls.Add(this.labelCurrentWorksheetMergeMode);
 			this.panel1.Controls.Add(this.linkLabelChangeWorksheetMergeMode);
 			this.panel1.Controls.Add(this.label5);
-			this.panel1.Controls.Add(this.label2);
+			this.panel1.Controls.Add(this.labelSelectWorksheet);
 			this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
 			this.panel1.Location = new System.Drawing.Point(0, 0);
 			this.panel1.Name = "panel1";
@@ -449,14 +449,14 @@
 			// 
 			// label2
 			// 
-			this.label2.BackColor = System.Drawing.Color.Honeydew;
-			this.label2.Dock = System.Windows.Forms.DockStyle.Top;
-			this.label2.Font = new System.Drawing.Font("Malgun Gothic", 12F);
-			this.label2.Location = new System.Drawing.Point(0, 0);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(946, 29);
-			this.label2.TabIndex = 0;
-			this.label2.Text = "선택한 워크시트 : ";
+			this.labelSelectWorksheet.BackColor = System.Drawing.Color.Honeydew;
+			this.labelSelectWorksheet.Dock = System.Windows.Forms.DockStyle.Top;
+			this.labelSelectWorksheet.Font = new System.Drawing.Font("Malgun Gothic", 12F);
+			this.labelSelectWorksheet.Location = new System.Drawing.Point(0, 0);
+			this.labelSelectWorksheet.Name = "label2";
+			this.labelSelectWorksheet.Size = new System.Drawing.Size(946, 29);
+			this.labelSelectWorksheet.TabIndex = 0;
+			this.labelSelectWorksheet.Text = "선택한 워크시트 : ";
 			// 
 			// panel3
 			// 
@@ -582,12 +582,12 @@
 
         private System.Windows.Forms.Panel panelTop;
         private System.Windows.Forms.SplitContainer splitContainerBottom;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label labelSelectWorksheet;
         private System.Windows.Forms.Label labelPathResult;
         private System.Windows.Forms.Label labelPathTheirs;
         private System.Windows.Forms.Label labelPathMine;
         private System.Windows.Forms.Label labelPathBase;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label labelWorksheetList;
         private System.Windows.Forms.ListView listViewWorksheets;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.Panel panel1;

@@ -387,7 +387,7 @@ namespace XlsxMerge.View
 
 		private void UpdatePreviewWindow()
 		{
-			label2.Text = "선택한 워크시트 : ";
+			labelSelectWorksheet.Text = "선택한 워크시트 : ";
 			labelCurrentWorksheetMergeMode.Text = "---";
 			var sheetDecision = getCurrentSheetDecision();
 			if (sheetDecision == null)
@@ -397,7 +397,7 @@ namespace XlsxMerge.View
 
 			var sheetResult = sheetDecision.SheetDiffResult;
 
-			label2.Text = label2.Text + sheetResult.WorksheetName;
+			labelSelectWorksheet.Text = labelSelectWorksheet.Text + sheetResult.WorksheetName;
 			labelCurrentWorksheetMergeMode.Text = sheetDecision.MergeModeDecision.GetDisplayText();
 			labelTotalDiffHunks.Text = $"{sheetDecision.HunkMergeDecisionList.Count}";
 
