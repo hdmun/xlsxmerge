@@ -108,7 +108,7 @@ namespace XlsxMerge.View
             var compareResults = _diffViewModel.DiffExcels(_pathViewModel.ComparisonMode);
 
             FakeBackgroundWorker.OnUpdateProgress("xlsx 파일 비교", "비교 완료. 기본 설정 진행 중..");
-			_xlsxMergeDecision = new XlsxMergeDecision(_diffViewModel, compareResults);
+			_xlsxMergeDecision = new XlsxMergeDecision(compareResults);
 
             var comparisonModeForResult = _pathViewModel.ComparisonMode;
             foreach (var eachSheetResult in compareResults)
@@ -423,10 +423,10 @@ namespace XlsxMerge.View
 
 
 
-            var worksheetBase = _xlsxMergeDecision.DiffViewModel.GetWorksheetsBy(sheetResult.WorksheetName, DocOrigin.Base);
+            var worksheetBase = _diffViewModel.GetWorksheetsBy(sheetResult.WorksheetName, DocOrigin.Base);
 			var previewData = MergeResultPreviewData.GeneratePreviewData(getCurrentSheetDecision(), worksheetBase == null ? 0 : worksheetBase.RowCount, checkBoxHideRemovedLines.Checked, checkBoxHideEqualLines.Checked);
 			previewDataCache[sheetResult.WorksheetName] = previewData;
-			MergeResultPreviewer.RefreshDataGridViewContents(_xlsxMergeDecision, sheetDecision, dataGridView1, previewData);
+			MergeResultPreviewer.RefreshDataGridViewContents(_diffViewModel, sheetDecision, dataGridView1, previewData);
 			UpdateDataGridViewColumnName();
 
 			_dataGridViewCellUpdatingInProgress = false;

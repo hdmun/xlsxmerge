@@ -1,12 +1,13 @@
 ﻿using XlsxMerge.Features.Diffs;
 using XlsxMerge.Merge;
+using XlsxMerge.ViewModel;
 
 namespace XlsxMerge
 {
     class MergeResultPreviewer
 	{
 		public static void RefreshDataGridViewContents(
-            XlsxMergeDecision xlsxMergeDecision,
+            DiffViewModel diffViewModel,
 			SheetMergeDecision sheetMergeDecision,
 			DataGridView dataGridView,
 			MergeResultPreviewData previewData)
@@ -15,7 +16,7 @@ namespace XlsxMerge
 				return;
 
 			var sheetResult = sheetMergeDecision.SheetDiffResult;
-			var parsedWorksheetData = xlsxMergeDecision.DiffViewModel.GetWorksheets(sheetResult.WorksheetName);
+			var parsedWorksheetData = diffViewModel.GetWorksheets(sheetResult.WorksheetName);
 
 			// 열 생성
 
