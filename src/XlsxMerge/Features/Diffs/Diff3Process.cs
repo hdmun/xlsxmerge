@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
 
-namespace XlsxMerge.Features;
+namespace XlsxMerge.Features.Diffs;
 
 public static class Diff3Process
 {
