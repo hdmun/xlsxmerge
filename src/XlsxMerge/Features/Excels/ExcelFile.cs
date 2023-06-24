@@ -6,7 +6,7 @@ public class ExcelFile
 {
     public readonly List<ExcelWorksheet> Worksheets = new();
 
-    public List<string>? GetTextLinesByWorksheetName(string worksheetName)
+    public string[]? GetTextLinesByWorksheetName(string worksheetName)
     {
         var targetWorksheet = Worksheets.Find(r => r.Name == worksheetName);
         if (targetWorksheet == null)
@@ -22,6 +22,6 @@ public class ExcelFile
 
             textByLines.Add(JsonConvert.SerializeObject(columnList, Formatting.None));
         }
-        return textByLines;
+        return textByLines.ToArray();
     }
 }

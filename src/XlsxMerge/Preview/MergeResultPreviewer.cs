@@ -5,7 +5,8 @@ namespace XlsxMerge
 {
     class MergeResultPreviewer
 	{
-		public static void RefreshDataGridViewContents(XlsxMergeDecision xlsxMergeDecision,
+		public static void RefreshDataGridViewContents(
+            XlsxMergeDecision xlsxMergeDecision,
 			SheetMergeDecision sheetMergeDecision,
 			DataGridView dataGridView,
 			MergeResultPreviewData previewData)
@@ -14,7 +15,7 @@ namespace XlsxMerge
 				return;
 
 			var sheetResult = sheetMergeDecision.SheetDiffResult;
-			var parsedWorksheetData = xlsxMergeDecision.DiffResult.GetParsedWorksheetData(sheetResult.WorksheetName);
+			var parsedWorksheetData = xlsxMergeDecision.DiffViewModel.GetWorksheets(sheetResult.WorksheetName);
 
 			// 열 생성
 

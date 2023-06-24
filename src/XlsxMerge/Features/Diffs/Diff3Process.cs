@@ -3,7 +3,7 @@ using System.Text;
 
 namespace XlsxMerge.Features.Diffs;
 
-public static class Diff3Process
+public class Diff3Process
 {
     private static readonly string FileName = @".\diff3.exe";
 

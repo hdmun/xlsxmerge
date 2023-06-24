@@ -97,12 +97,18 @@ namespace XlsxMerge.View
 			// progress box set-up
 			FakeBackgroundWorker.OnUpdateProgress = onUpdateProgress;
 
-			// diff3 진행
-			var diff3Data = new XlsxDiff3Core();
-			var compareResults = diff3Data.Run(_pathViewModel);
+            // diff3 진행
+            _diffViewModel.Read(
+                _pathViewModel.ComparisonMode,
+                _pathViewModel.BasePath,
+                _pathViewModel.MinePath,
+                _pathViewModel.TheirsPath
+            );
 
-			FakeBackgroundWorker.OnUpdateProgress("xlsx 파일 비교", "비교 완료. 기본 설정 진행 중..");
-			_xlsxMergeDecision = new XlsxMergeDecision(diff3Data, compareResults);
+            var compareResults = _diffViewModel.DiffExcels(_pathViewModel.ComparisonMode);
+
+            FakeBackgroundWorker.OnUpdateProgress("xlsx 파일 비교", "비교 완료. 기본 설정 진행 중..");
+			_xlsxMergeDecision = new XlsxMergeDecision(_diffViewModel, compareResults);
 
             var comparisonModeForResult = _pathViewModel.ComparisonMode;
             foreach (var eachSheetResult in compareResults)
@@ -417,7 +423,7 @@ namespace XlsxMerge.View
 
 
 
-			var worksheetBase = _xlsxMergeDecision.DiffResult.GetParsedWorksheetData(sheetResult.WorksheetName)[DocOrigin.Base];
+            var worksheetBase = _xlsxMergeDecision.DiffViewModel.GetWorksheetsBy(sheetResult.WorksheetName, DocOrigin.Base);
 			var previewData = MergeResultPreviewData.GeneratePreviewData(getCurrentSheetDecision(), worksheetBase == null ? 0 : worksheetBase.RowCount, checkBoxHideRemovedLines.Checked, checkBoxHideEqualLines.Checked);
 			previewDataCache[sheetResult.WorksheetName] = previewData;
 			MergeResultPreviewer.RefreshDataGridViewContents(_xlsxMergeDecision, sheetDecision, dataGridView1, previewData);

@@ -1,20 +1,18 @@
 ﻿using XlsxMerge.Diff;
 using XlsxMerge.Merge;
+using XlsxMerge.ViewModel;
 
 namespace XlsxMerge
 {
     class XlsxMergeDecision
     {
         public readonly List<SheetMergeDecision> SheetMergeDecisionList;
-        public readonly XlsxDiff3Core DiffResult;
+        public readonly DiffViewModel DiffViewModel;
 
-        public XlsxMergeDecision(XlsxDiff3Core diffResult, List<SheetDiffResult> compareResults)
+        public XlsxMergeDecision(DiffViewModel diffViewModel, List<SheetDiffResult> compareResults)
         {
-            DiffResult = diffResult;
+            DiffViewModel = diffViewModel;
             SheetMergeDecisionList = new List<SheetMergeDecision>();
-
-            if (diffResult == null)
-                return;
 
             foreach (var result in compareResults)
                 SheetMergeDecisionList.Add(new SheetMergeDecision(result));
