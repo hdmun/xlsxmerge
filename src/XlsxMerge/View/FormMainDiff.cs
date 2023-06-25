@@ -1,19 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Windows.Forms;
-using System.IO;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using XlsxMerge;
-using XlsxMerge.Extensions;
 using XlsxMerge.Diff;
-using XlsxMerge.ViewModel;
-using XlsxMerge.Merge;
+using XlsxMerge.Extensions;
 using XlsxMerge.Features.Diffs;
+using XlsxMerge.Merge;
+using XlsxMerge.ViewModel;
 
 namespace XlsxMerge.View
 {
@@ -21,8 +12,9 @@ namespace XlsxMerge.View
 	{
 		private readonly PathViewModel _pathViewModel;
         private readonly DiffViewModel _diffViewModel;
+        private readonly MergeViewModel _mergeViewModel;
 
-        public FormMainDiff(PathViewModel pathViewModel, DiffViewModel diffViewModel)
+        public FormMainDiff(PathViewModel pathViewModel, DiffViewModel diffViewModel, MergeViewModel mergeViewModel)
 		{
 			InitializeComponent();
 
@@ -34,6 +26,7 @@ namespace XlsxMerge.View
 
             _pathViewModel = pathViewModel;
             _diffViewModel = diffViewModel;
+            _mergeViewModel = mergeViewModel;
         }
 
 		XlsxMergeDecision _xlsxMergeDecision;
