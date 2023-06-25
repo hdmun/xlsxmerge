@@ -113,7 +113,7 @@ namespace XlsxMerge.View
 
                 if (comparisonModeForResult == ComparisonMode.ThreeWay)
                 {
-                    if (eachSheetResult.HunkList.Any(r => r.hunkStatus == Diff3HunkStatus.Conflict))
+                    if (eachSheetResult.HasConflict)
                     {
                         var conflictSubItem = listViewItem.SubItems.Add("발생");
                         conflictSubItem.BackColor = Color.Gold;

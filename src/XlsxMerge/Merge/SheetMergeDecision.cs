@@ -51,12 +51,11 @@ public class SheetMergeDecision
             // a3. Base있음 + Mine없음 = Delete, UseBase
             // a4. Base없음 + Mine생성 = UseMine
 
-            var docsContaining = SheetDiffResult.DocsContaining;
-            if (docsContaining.Contains(DocOrigin.Base))
+            if (SheetDiffResult.HasBaseDoc)
             {
-                if (docsContaining.Contains(DocOrigin.Mine))
+                if (SheetDiffResult.HasMineDoc)
                 {
-                    if (SheetDiffResult.HunkList.Find(r => r.hunkStatus == Diff3HunkStatus.MineDiffers) == null)
+                    if (SheetDiffResult.HasMineDiffers)
                         candidateList.Add(WorksheetMergeMode.Unchanged); // a1
                     else
                         candidateList.Add(WorksheetMergeMode.Merge); // a2
@@ -94,30 +93,29 @@ public class SheetMergeDecision
             // Base없음 + Mine없음 + Theirs생성 = UseTheirs
             // Base없음 + Mine생성 + Theirs생성 = Merge
 
-            var docsContaining = SheetDiffResult.DocsContaining;
-            if (docsContaining.Contains(DocOrigin.Base))
+            if (SheetDiffResult.HasBaseDoc)
             {
-                if (SheetDiffResult.HunkList.Count == 0)
+                if (SheetDiffResult.IsEmtpyHunk)
                 {
                     candidateList.Add(WorksheetMergeMode.Unchanged);
                 }
-                else if (docsContaining.Contains(DocOrigin.Mine) && docsContaining.Contains(DocOrigin.Theirs))
+                else if (SheetDiffResult.HasMineDoc && SheetDiffResult.HasTheirsDoc)
                 {
                     candidateList.Add(WorksheetMergeMode.Merge);
-                    if (SheetDiffResult.HunkList.Find(r => r.hunkStatus == Diff3HunkStatus.MineDiffers) != null)
+                    if (SheetDiffResult.HasMineDiffers)
                         candidateList.Add(WorksheetMergeMode.UseMine);
-                    if (SheetDiffResult.HunkList.Find(r => r.hunkStatus == Diff3HunkStatus.TheirsDiffers) != null)
+                    if (SheetDiffResult.HasTheirsDiffers)
                         candidateList.Add(WorksheetMergeMode.UseTheirs);
                     candidateList.Add(WorksheetMergeMode.UseBase);
                 }
                 else
                 {
                     // 둘 중에 하나가 없는 상태.
-                    if (SheetDiffResult.HunkList.Find(r => r.hunkStatus == Diff3HunkStatus.Conflict) != null)
+                    if (SheetDiffResult.HasConflict)
                     {
-                        if (docsContaining.Contains(DocOrigin.Mine))
+                        if (SheetDiffResult.HasMineDoc)
                             candidateList.Add(WorksheetMergeMode.UseMine);
-                        if (docsContaining.Contains(DocOrigin.Theirs))
+                        if (SheetDiffResult.HasTheirsDoc)
                             candidateList.Add(WorksheetMergeMode.UseTheirs);
                         candidateList.Add(WorksheetMergeMode.UseBase);
                         candidateList.Add(WorksheetMergeMode.Delete);
@@ -131,17 +129,19 @@ public class SheetMergeDecision
             }
             else
             {
-                if (docsContaining.Contains(DocOrigin.Mine) && docsContaining.Contains(DocOrigin.Theirs) == false)
+                if (SheetDiffResult.HasMineDoc && !SheetDiffResult.HasTheirsDoc)
                 {
                     candidateList.Add(WorksheetMergeMode.UseMine);
                     candidateList.Add(WorksheetMergeMode.Delete);
                 }
-                if (docsContaining.Contains(DocOrigin.Mine) == false && docsContaining.Contains(DocOrigin.Theirs))
+
+                if (!SheetDiffResult.HasMineDoc && SheetDiffResult.HasTheirsDoc)
                 {
                     candidateList.Add(WorksheetMergeMode.UseTheirs);
                     candidateList.Add(WorksheetMergeMode.Delete);
                 }
-                if (docsContaining.Contains(DocOrigin.Mine) && docsContaining.Contains(DocOrigin.Theirs))
+
+                if (SheetDiffResult.HasMineDoc && SheetDiffResult.HasTheirsDoc)
                 {
                     candidateList.Add(WorksheetMergeMode.Merge);
                     candidateList.Add(WorksheetMergeMode.UseMine);

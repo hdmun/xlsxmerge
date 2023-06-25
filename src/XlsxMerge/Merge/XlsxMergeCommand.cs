@@ -26,13 +26,13 @@ namespace XlsxMerge
 						// do nothing
 						break;
 					case WorksheetMergeMode.Delete:
-						if (sheetDecision.SheetDiffResult.DocsContaining.Contains(_docOriginMergeInto))
-							CommandList.Add(XlsxMergeCommandItem.DeleteSheet(_docOriginMergeInto, sheetDecision.WorksheetName));
+						if (sheetDecision.SheetDiffResult.HasDocOrigin(_docOriginMergeInto))
+                            CommandList.Add(XlsxMergeCommandItem.DeleteSheet(_docOriginMergeInto, sheetDecision.WorksheetName));
 						break;
 					case WorksheetMergeMode.UseBase:
 						if (_docOriginMergeInto != DocOrigin.Base)
 						{
-							if (sheetDecision.SheetDiffResult.DocsContaining.Contains(_docOriginMergeInto))
+							if (sheetDecision.SheetDiffResult.HasDocOrigin(_docOriginMergeInto))
 								CommandList.Add(XlsxMergeCommandItem.DeleteSheet(_docOriginMergeInto, sheetDecision.WorksheetName));
 							CommandList.Add(XlsxMergeCommandItem.CopySheet(DocOrigin.Base, _docOriginMergeInto, sheetDecision.WorksheetName));
 						}
@@ -40,16 +40,16 @@ namespace XlsxMerge
 					case WorksheetMergeMode.UseMine:
 						if (_docOriginMergeInto != DocOrigin.Mine)
 						{
-							if (sheetDecision.SheetDiffResult.DocsContaining.Contains(_docOriginMergeInto))
-								CommandList.Add(XlsxMergeCommandItem.DeleteSheet(_docOriginMergeInto, sheetDecision.WorksheetName));
+							if (sheetDecision.SheetDiffResult.HasDocOrigin(_docOriginMergeInto))
+                                CommandList.Add(XlsxMergeCommandItem.DeleteSheet(_docOriginMergeInto, sheetDecision.WorksheetName));
 							CommandList.Add(XlsxMergeCommandItem.CopySheet(DocOrigin.Mine, _docOriginMergeInto, sheetDecision.WorksheetName));
 						}
 						break;
 					case WorksheetMergeMode.UseTheirs:
 						if (_docOriginMergeInto != DocOrigin.Theirs)
 						{
-							if (sheetDecision.SheetDiffResult.DocsContaining.Contains(_docOriginMergeInto))
-								CommandList.Add(XlsxMergeCommandItem.DeleteSheet(_docOriginMergeInto, sheetDecision.WorksheetName));
+							if (sheetDecision.SheetDiffResult.HasDocOrigin(_docOriginMergeInto))
+                                CommandList.Add(XlsxMergeCommandItem.DeleteSheet(_docOriginMergeInto, sheetDecision.WorksheetName));
 							CommandList.Add(XlsxMergeCommandItem.CopySheet(DocOrigin.Theirs, _docOriginMergeInto, sheetDecision.WorksheetName));
 						}
 
