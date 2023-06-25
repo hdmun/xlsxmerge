@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using XlsxMerge.Features.Diffs;
 
-namespace XlsxMerge.Merge
+namespace XlsxMerge.Features.Merges
 {
     // XlsxMergeDecision으로부터, 실제 조립 명령어를 만들어 냅니다.
     class XlsxMergeCommand

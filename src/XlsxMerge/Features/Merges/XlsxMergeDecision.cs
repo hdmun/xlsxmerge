@@ -1,6 +1,6 @@
 ﻿using XlsxMerge.Features.Diffs;
 
-namespace XlsxMerge.Merge
+namespace XlsxMerge.Features.Merges
 {
     class XlsxMergeDecision
     {

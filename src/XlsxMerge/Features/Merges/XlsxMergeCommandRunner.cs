@@ -6,7 +6,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 using System.Runtime.InteropServices;
 using XlsxMerge.Features.Diffs;
 
-namespace XlsxMerge.Merge
+namespace XlsxMerge.Features.Merges
 {
     class XlsxMergeCommandRunner : IDisposable
     {

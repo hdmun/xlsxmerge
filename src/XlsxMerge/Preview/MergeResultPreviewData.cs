@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using XlsxMerge.Features.Diffs;
-using XlsxMerge.Merge;
+using XlsxMerge.Features.Merges;
 
 namespace XlsxMerge
 {
