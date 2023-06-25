@@ -1,4 +1,4 @@
-﻿namespace XlsxMerge.Diff;
+﻿namespace XlsxMerge.Features.Diffs;
 
 public enum ComparisonMode
 {

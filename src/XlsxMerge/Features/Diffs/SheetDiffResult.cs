@@ -1,8 +1,7 @@
 ﻿using System.Collections.Immutable;
-using XlsxMerge.Features.Diffs;
 using XlsxMerge.Model;
 
-namespace XlsxMerge.Diff;
+namespace XlsxMerge.Features.Diffs;
 
 public class SheetDiffResult
 {

@@ -8,7 +8,7 @@ using XlsxMerge.Merge;
 
 namespace XlsxMerge
 {
-	class MergeResultPreviewData
+    class MergeResultPreviewData
 	{
 		public readonly List<String> RowInfoList = new List<string>();
 		public readonly List<int> HunkStartsPosList = new List<int>(); // diff hunk navigate에 사용

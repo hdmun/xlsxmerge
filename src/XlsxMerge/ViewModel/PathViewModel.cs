@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using XlsxMerge.Diff;
 using XlsxMerge.Extensions;
+using XlsxMerge.Features.Diffs;
 using XlsxMerge.Model;
 
 namespace XlsxMerge.ViewModel;

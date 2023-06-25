@@ -2,7 +2,6 @@
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using XlsxMerge.Diff;
 using XlsxMerge.Features.Diffs;
 using XlsxMerge.Features.Excels;
 

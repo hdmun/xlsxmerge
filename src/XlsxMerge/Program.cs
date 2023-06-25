@@ -1,4 +1,4 @@
-﻿using XlsxMerge.Diff;
+﻿using XlsxMerge.Features.Diffs;
 using XlsxMerge.Model;
 using XlsxMerge.View;
 using XlsxMerge.ViewModel;

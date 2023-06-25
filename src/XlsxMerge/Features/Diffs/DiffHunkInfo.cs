@@ -1,6 +1,4 @@
-﻿using XlsxMerge.Features.Diffs;
-
-namespace XlsxMerge.Diff;
+﻿namespace XlsxMerge.Features.Diffs;
 
 public class DiffHunkInfo
 {
