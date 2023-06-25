@@ -12,14 +12,14 @@ public class SheetDiffResult
     }
 
     public readonly string WorksheetName;
-    public readonly ComparisonMode ComparisonMode;
+    private readonly ComparisonMode _comparisonMode;
     private readonly ImmutableHashSet<DocOrigin> _containDocs; // 이 워크시트가 있는 문서.
     public readonly List<DiffHunkInfo> HunkList;
 
     private SheetDiffResult(string worksheetName, ComparisonMode comparisonMode, ImmutableHashSet<DocOrigin> docsContaining, List<DiffHunkInfo> hunkList)
     {
         WorksheetName = worksheetName;
-        ComparisonMode = comparisonMode;
+        _comparisonMode = comparisonMode;
         _containDocs = docsContaining;
         HunkList = hunkList;
     }
@@ -68,5 +68,136 @@ public class SheetDiffResult
         if (HasHunkStatus(targetDocDiffers))
             return new ModificationStateModel("수정됨", Color.LightYellow);
         return new ModificationStateModel("같음", Color.White);
+    }
+
+    public List<WorksheetMergeMode> ToMergeMode()
+    {
+        switch (_comparisonMode)
+        {
+            case ComparisonMode.TwoWay:
+                return ToTwoWayMergeMode();
+            case ComparisonMode.ThreeWay:
+                return ToThreeWayMergeMode();
+            default:
+                return new List<WorksheetMergeMode>();
+        }
+    }
+
+    private List<WorksheetMergeMode> ToTwoWayMergeMode()
+    {
+        var candidateList = new List<WorksheetMergeMode>();
+
+        // Two-way merge
+        // a1. Base있음 + Mine동일 = Unchanged
+        // a2. Base있음 + Mine변경 = Merge
+        // a3. Base있음 + Mine없음 = Delete, UseBase
+        // a4. Base없음 + Mine생성 = UseMine
+
+        if (HasBaseDoc)
+        {
+            if (HasMineDoc)
+            {
+                if (HasMineDiffers)
+                    candidateList.Add(WorksheetMergeMode.Unchanged); // a1
+                else
+                    candidateList.Add(WorksheetMergeMode.Merge); // a2
+            }
+            else
+            {
+                candidateList.Add(WorksheetMergeMode.Delete); // a3
+                candidateList.Add(WorksheetMergeMode.UseBase); // a3
+
+            }
+        }
+        else
+        {
+            candidateList.Add(WorksheetMergeMode.UseMine); // a4
+        }
+
+        return candidateList;
+    }
+
+    private List<WorksheetMergeMode> ToThreeWayMergeMode()
+    {
+        var candidateList = new List<WorksheetMergeMode>();
+        if (_comparisonMode != ComparisonMode.ThreeWay)
+            return candidateList;
+
+        // Three-way merge
+        // Base있음 + Mine동일 + Theirs동일 = Unchanged
+
+        // Base있음 + Mine동일 + Theirs변경 = Merge
+        // Base있음 + Mine변경 + Theirs동일 = Merge
+        // Base있음 + Mine변경 + Theirs변경 = Merge
+
+        // Base있음 + Mine변경 + Theirs없음 = UseMine, UseBase, Delete
+        // Base있음 + Mine없음 + Theirs변경 = UseTheirs, UseBase, Delete
+
+        // Base있음 + Mine동일 + Theirs없음 = Delete, UseBase
+        // Base있음 + Mine없음 + Theirs동일 = Delete, UseBase
+        // Base있음 + Mine없음 + Theirs없음 = Delete, UseBase
+
+        // Base없음 + Mine생성 + Theirs없음 = UseMine
+        // Base없음 + Mine없음 + Theirs생성 = UseTheirs
+        // Base없음 + Mine생성 + Theirs생성 = Merge
+
+        if (HasBaseDoc)
+        {
+            if (IsEmtpyHunk)
+            {
+                candidateList.Add(WorksheetMergeMode.Unchanged);
+            }
+            else if (HasMineDoc && HasTheirsDoc)
+            {
+                candidateList.Add(WorksheetMergeMode.Merge);
+                if (HasMineDiffers)
+                    candidateList.Add(WorksheetMergeMode.UseMine);
+                if (HasTheirsDiffers)
+                    candidateList.Add(WorksheetMergeMode.UseTheirs);
+                candidateList.Add(WorksheetMergeMode.UseBase);
+            }
+            else
+            {
+                // 둘 중에 하나가 없는 상태.
+                if (HasConflict)
+                {
+                    if (HasMineDoc)
+                        candidateList.Add(WorksheetMergeMode.UseMine);
+                    if (HasTheirsDoc)
+                        candidateList.Add(WorksheetMergeMode.UseTheirs);
+                    candidateList.Add(WorksheetMergeMode.UseBase);
+                    candidateList.Add(WorksheetMergeMode.Delete);
+                }
+                else
+                {
+                    candidateList.Add(WorksheetMergeMode.Delete);
+                    candidateList.Add(WorksheetMergeMode.UseBase);
+                }
+            }
+        }
+        else
+        {
+            if (HasMineDoc && !HasTheirsDoc)
+            {
+                candidateList.Add(WorksheetMergeMode.UseMine);
+                candidateList.Add(WorksheetMergeMode.Delete);
+            }
+
+            if (!HasMineDoc && HasTheirsDoc)
+            {
+                candidateList.Add(WorksheetMergeMode.UseTheirs);
+                candidateList.Add(WorksheetMergeMode.Delete);
+            }
+
+            if (HasMineDoc && HasTheirsDoc)
+            {
+                candidateList.Add(WorksheetMergeMode.Merge);
+                candidateList.Add(WorksheetMergeMode.UseMine);
+                candidateList.Add(WorksheetMergeMode.UseTheirs);
+                candidateList.Add(WorksheetMergeMode.Delete);
+            }
+        }
+
+        return candidateList;
     }
 }
