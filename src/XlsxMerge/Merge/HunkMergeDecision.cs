@@ -44,26 +44,7 @@ public class HunkMergeDecision
         DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Theirs, DocOrigin.Mine, DocOrigin.Base });
 
         // exclude
-        List<DocOrigin> docOriginsToExclude = new List<DocOrigin>();
-        switch (BaseHunkInfo.hunkStatus)
-        {
-            case Diff3HunkStatus.BaseDiffers:
-                docOriginsToExclude.Add(DocOrigin.Theirs);
-                break;
-            case Diff3HunkStatus.MineDiffers:
-                docOriginsToExclude.Add(DocOrigin.Theirs);
-                break;
-            case Diff3HunkStatus.TheirsDiffers:
-                docOriginsToExclude.Add(DocOrigin.Mine);
-                break;
-            case Diff3HunkStatus.Conflict:
-                break;
-        }
-        var rowRangeMap = BaseHunkInfo.rowRangeMap;
-        foreach (var docOrigin in new[] { DocOrigin.Base, DocOrigin.Mine, DocOrigin.Theirs })
-            if (rowRangeMap.ContainsKey(docOrigin) == false || rowRangeMap[docOrigin].RowCount == 0)
-                docOriginsToExclude.Add(docOrigin);
-
+        var docOriginsToExclude = BaseHunkInfo.ToExcludeDocOrigins();
         foreach (var docOrigin in docOriginsToExclude)
             DocMergeOrderCandidates.RemoveAll(r => r != null && r.Contains(docOrigin));
     }
