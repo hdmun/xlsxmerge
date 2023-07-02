@@ -83,6 +83,27 @@ public class DiffViewModel : INotifyPropertyChanged
         );
     }
 
+    public List<double> CalcColumnWidthList(string worksheetName)
+    {
+        var parsedWorksheetData = GetWorksheets(worksheetName);
+        // C1, C2, ... 
+        var unifiedColumnWidthList = new List<double>();
+        var worksheets = parsedWorksheetData.Values
+            .Where(x => x != null)
+            .Where(x => x?.RowCount >= 0)
+            .Cast<ExcelWorksheet>();
+        foreach (var worksheet in worksheets)
+        {
+            int elemToCopy = worksheet.ColumnWidthList.Count - unifiedColumnWidthList.Count;
+            if (elemToCopy < 1)
+                continue;
+
+            var range = worksheet.ColumnWidthList.GetRange(unifiedColumnWidthList.Count, elemToCopy);
+            unifiedColumnWidthList.AddRange(range);
+        }
+        return unifiedColumnWidthList;
+    }
+
     public ExcelWorksheet? GetWorksheetsBy(string worksheetName, DocOrigin docOrigin)
     {
         var worksheets = GetWorksheets(worksheetName);

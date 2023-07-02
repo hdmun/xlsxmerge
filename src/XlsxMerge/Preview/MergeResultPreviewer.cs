@@ -18,52 +18,20 @@ namespace XlsxMerge
 			var sheetResult = sheetMergeDecision.SheetDiffResult;
 			var parsedWorksheetData = diffViewModel.GetWorksheets(sheetResult.WorksheetName);
 
-			// 열 생성
+            // 열 생성
+            dataGridView.Rows.Clear();
+            dataGridView.Columns.Clear();
 
-			dataGridView.Rows.Clear();
-			dataGridView.Columns.Clear();
+            var columnWidthList = diffViewModel.CalcColumnWidthList(sheetResult.WorksheetName);
+            var columns = MakeColumns(columnWidthList);
+            dataGridView.Columns.AddRange(columns.ToArray());
 
-			// 기본 열
-			dataGridView.Columns.Add("hunk_no", "변경 위치");
-			dataGridView.Columns["hunk_no"].Width = 80;
-			dataGridView.Columns.Add("source_line", "소스(행)");
-			dataGridView.Columns["source_line"].Width = 80;
-
-			// C1, C2, ... 
-			var unifiedColumnWidthList = new List<double>();
-			foreach (var eachWorksheet in parsedWorksheetData.Values)
-			{
-				if (eachWorksheet == null || eachWorksheet.RowCount == 0)
-					continue;
-
-				int elemToCopy = eachWorksheet.ColumnWidthList.Count - unifiedColumnWidthList.Count;
-				if (elemToCopy < 1)
-					continue;
-
-				unifiedColumnWidthList.AddRange(eachWorksheet.ColumnWidthList.GetRange(unifiedColumnWidthList.Count, elemToCopy));
-			}
-
-			if (unifiedColumnWidthList.Count == 0)
-			{
-				// 모두 빈 워크시트입니다.
-				dataGridView.Columns.Add("C1", "정보");
-				dataGridView.Columns["C1"].Width = 400;
-				int rowIndex = dataGridView.Rows.Add();
-				dataGridView.Rows[rowIndex].Cells["C1"].Value = "(빈 워크시트입니다.)";
-				return;
-			}
-
-			for (int i = 1; i <= unifiedColumnWidthList.Count; i++)
-			{
-				string columnName = HelperFunctions.GetExcelColumnName(i);
-				int columnWidth = (int)(unifiedColumnWidthList[i - 1]);
-				dataGridView.Columns.Add("C" + i.ToString(), columnName + "::[]");
-				dataGridView.Columns["C" + i.ToString()].Width = columnWidth;
-			}
-
-			foreach (DataGridViewColumn eachCol in dataGridView.Columns)
-				eachCol.SortMode = DataGridViewColumnSortMode.NotSortable;
-
+            if (columnWidthList.Count == 0)
+            {
+                int rowIndex = dataGridView.Rows.Add();
+                dataGridView.Rows[rowIndex].Cells["C1"].Value = "(빈 워크시트입니다.)";
+                return;
+            }
 
 			var cachedTempPreviewLines = previewData.RowInfoList;
 
@@ -159,5 +127,60 @@ namespace XlsxMerge
 				}
 			}
 		}
+
+        private static IEnumerable<DataGridViewTextBoxColumn> MakeColumns(List<double> columnWidthList)
+        {
+            var columns = new List<DataGridViewTextBoxColumn>();
+            // 기본 열
+            var defaultColumn = new DataGridViewTextBoxColumn
+            {
+                Name = "hunk_no",
+                HeaderText = "변경 위치",
+                Width = 80,
+                SortMode = DataGridViewColumnSortMode.NotSortable
+            };
+            columns.Add(defaultColumn);
+
+            defaultColumn = new DataGridViewTextBoxColumn
+            {
+                Name = "source_line",
+                HeaderText = "소스(행)",
+                Width = 80,
+                SortMode = DataGridViewColumnSortMode.NotSortable
+            };
+            columns.Add(defaultColumn);
+
+            if (columnWidthList.Count == 0)
+            {
+                // 모두 빈 워크시트입니다.
+                var emptyColumn = new DataGridViewTextBoxColumn
+                {
+                    Name = "C1",
+                    HeaderText = "정보",
+                    Width = 400,
+                    SortMode = DataGridViewColumnSortMode.NotSortable
+                };
+                columns.Add(emptyColumn);
+                return columns;
+            }
+
+            for (int i = 0; i < columnWidthList.Count; i++)
+            {
+                int columnNo = i + 1;
+                string columnText = HelperFunctions.GetExcelColumnName(columnNo);
+                int columnWidth = (int)(columnWidthList[i]);
+
+                var dataGridViewTextBoxColumn = new DataGridViewTextBoxColumn
+                {
+                    Name = $"C{columnNo}",
+                    HeaderText = $"{columnText}::[]",
+                    Width = columnWidth,
+                    SortMode = DataGridViewColumnSortMode.NotSortable
+                };
+                columns.Add(dataGridViewTextBoxColumn);
+            }
+
+            return columns;
+        }
 	}
 }
