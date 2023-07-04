@@ -1,4 +1,5 @@
-﻿using XlsxMerge.Features.Diffs;
+﻿using XlsxMerge.Extensions;
+using XlsxMerge.Features.Diffs;
 using XlsxMerge.Features.Merges;
 using XlsxMerge.ViewModel;
 
@@ -6,7 +7,9 @@ namespace XlsxMerge
 {
     class MergeResultPreviewer
 	{
-		public static void RefreshDataGridViewContents(
+        private static readonly Font StrikeOutFont = new (SystemFonts.DefaultFont, FontStyle.Strikeout);
+
+        public static void RefreshDataGridViewContents(
             DiffViewModel diffViewModel,
 			SheetMergeDecision sheetMergeDecision,
 			DataGridView dataGridView,
@@ -35,88 +38,97 @@ namespace XlsxMerge
 
 			var cachedTempPreviewLines = previewData.RowInfoList;
 
-			Font strikeoutFont = new Font(SystemFonts.DefaultFont, FontStyle.Strikeout);
-			dataGridView.RowCount = cachedTempPreviewLines.Count();
-			for (int currentRowIdx = 0; currentRowIdx < cachedTempPreviewLines.Count(); currentRowIdx++)
+            // iterate rows
+			dataGridView.RowCount = cachedTempPreviewLines?.Count() ?? 0;
+			for (int currentRowIdx = 0; currentRowIdx < dataGridView.RowCount; currentRowIdx++)
 			{
 				var eachRow = cachedTempPreviewLines[currentRowIdx];
-				var dgvRow = dataGridView.Rows[currentRowIdx];
+				DataGridViewRow dgvRow = dataGridView.Rows[currentRowIdx];
 
-				string[] token = eachRow.Split(new char[] { ':' });
-				dgvRow.Cells["hunk_no"].Value = "";
+                // set 'hunk_no' cell
+                var hunkNoCell = dgvRow.Cells["hunk_no"];
+                hunkNoCell.Value = "";
 				{
 					var candidateHunkIdx = previewData.GetHunkIdxByRowNumber(currentRowIdx);
                     if (candidateHunkIdx >= 0)
                     {
                         if (sheetMergeDecision.HunkMergeDecisionList[candidateHunkIdx].DocMergeOrder == null)
-                            dgvRow.Cells["hunk_no"].Style.SelectionBackColor = Color.Red;
+                            hunkNoCell.Style.SelectionBackColor = Color.Red;
                         else
-                            dgvRow.Cells["hunk_no"].Style.SelectionBackColor = Color.LightSlateGray;
-                        dgvRow.Cells["hunk_no"].Value = $"#{candidateHunkIdx + 1}";
+                            hunkNoCell.Style.SelectionBackColor = Color.LightSlateGray;
+
+                        hunkNoCell.Value = $"#{candidateHunkIdx + 1}";
                     }
 				}
 
-				string sourceLineText = token[0];
-				if (token.Length == 1)
+                string[] token = eachRow.Split(new char[] { ':' });
+                if (token.Length == 1)
 				{
 					dgvRow.DefaultCellStyle.BackColor = Color.Yellow;
-					dgvRow.Cells["source_line"].Value = sourceLineText;
+					dgvRow.Cells["source_line"].Value = token.First();
 					continue;
 				}
 
+                // TODO: 정리필요
+                string sourceLineText = token.First();
 				if (token.Length > 1)
 					sourceLineText = sourceLineText + $": {token[1]}";
 
 				bool isRemovedLine = token.Length > 2 && token[2].EndsWith("-1");
                 if (isRemovedLine)
+                {
                     sourceLineText = sourceLineText + " [-]";
+                    dgvRow.DefaultCellStyle.Font = StrikeOutFont;
+                }
+
                 int refBaseRowNumber = int.MinValue;
 				if (token.Length > 2)
 					refBaseRowNumber = int.Parse(token[2]);
 
-				Color backColor = Color.White;
-				int rowNumber = int.Parse(token[1]);
-				var refWorksheet = parsedWorksheetData[DocOrigin.Base];
-				if (token[0].StartsWith("base"))
-				{
-					refWorksheet = parsedWorksheetData[DocOrigin.Base];
-					backColor = ColorScheme.BaseBackground;
-				}
-				else if (token[0].StartsWith("mine"))
-				{
-					refWorksheet = parsedWorksheetData[DocOrigin.Mine];
-					backColor = ColorScheme.MineBackground;
-				}
-				else if (token[0].StartsWith("theirs"))
-				{
-					refWorksheet = parsedWorksheetData[DocOrigin.Theirs];
-					backColor = ColorScheme.TheirsBackground;
-				}
-				else
-				{
-					sourceLineText = "=";
-				}
+                string firstToken = token.First();
+                var docOrigin = firstToken.ToDocOrigin();
+                if (docOrigin is null)
+                    sourceLineText = "=";
 
-				dgvRow.DefaultCellStyle.BackColor = backColor;
-				if (isRemovedLine)
-					dgvRow.DefaultCellStyle.Font = strikeoutFont;
-				dgvRow.Cells["source_line"].Value = sourceLineText;
+                // set 'source_line' cell
+                dgvRow.Cells["source_line"].Value = sourceLineText;
 
-				if (refWorksheet.RowCount == 0)
+                // set back color
+                Color backColor = docOrigin switch
+                {
+                    DocOrigin.Base => ColorScheme.BaseBackground,
+                    DocOrigin.Mine => ColorScheme.MineBackground,
+                    DocOrigin.Theirs => ColorScheme.TheirsBackground,
+                    _ => Color.White
+                };
+                dgvRow.DefaultCellStyle.BackColor = backColor;
+
+                // get refWorksheet
+                var refWorksheet = docOrigin switch
+                {
+                    DocOrigin.Base => parsedWorksheetData[DocOrigin.Base],
+                    DocOrigin.Mine => parsedWorksheetData[DocOrigin.Mine],
+                    DocOrigin.Theirs => parsedWorksheetData[DocOrigin.Theirs],
+                    _ => parsedWorksheetData[DocOrigin.Base]
+                };
+                if (refWorksheet?.RowCount == 0)
 					continue;
 
-
-				int maxColumn = refWorksheet.ColumnCount;
+                // iterate columns
+                int rowNumber = int.Parse(token[1]);
+                int maxColumn = refWorksheet?.ColumnCount ?? 0;
 				for (int cellNumber = 1; cellNumber <= maxColumn; cellNumber++)
 				{
 					var currentCell = refWorksheet.Cell(rowNumber, cellNumber);
-					var currentCellDgv = dgvRow.Cells["C" + cellNumber.ToString()];
+                    var columnName = $"C{cellNumber}";
+                    var currentCellDgv = dgvRow.Cells[columnName];
 					currentCellDgv.Value = currentCell.Value2String;
 
-					if (refBaseRowNumber <= 0 || parsedWorksheetData[DocOrigin.Base] == null)
+                    var baseWorksheet = parsedWorksheetData[DocOrigin.Base];
+                    if (refBaseRowNumber <= 0 || baseWorksheet == null)
 						continue;
 
-					var baseCell = parsedWorksheetData[DocOrigin.Base].Cell(refBaseRowNumber, cellNumber);
+					var baseCell = baseWorksheet.Cell(refBaseRowNumber, cellNumber);
 					if (currentCell.ContentsForDiff3 == baseCell.ContentsForDiff3)
 						continue;
 
