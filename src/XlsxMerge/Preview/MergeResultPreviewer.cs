@@ -1,5 +1,6 @@
 ﻿using XlsxMerge.Extensions;
 using XlsxMerge.Features.Diffs;
+using XlsxMerge.Features.Excels;
 using XlsxMerge.Features.Merges;
 using XlsxMerge.ViewModel;
 
@@ -61,6 +62,7 @@ namespace XlsxMerge
                     }
 				}
 
+                // parse token
                 string[] token = eachRow.Split(new char[] { ':' });
                 if (token.Length == 1)
 				{
@@ -74,16 +76,22 @@ namespace XlsxMerge
 				if (token.Length > 1)
 					sourceLineText = sourceLineText + $": {token[1]}";
 
-				bool isRemovedLine = token.Length > 2 && token[2].EndsWith("-1");
+                bool isRemovedLine = false;
+
+                int refBaseRowNumber = int.MinValue;
+				if (token.Length > 2)
+                {
+                    var rowNumberToken = token[2];
+                    refBaseRowNumber = int.Parse(rowNumberToken);
+
+                    isRemovedLine = rowNumberToken.EndsWith("-1");
+                }
+
                 if (isRemovedLine)
                 {
                     sourceLineText = sourceLineText + " [-]";
                     dgvRow.DefaultCellStyle.Font = StrikeOutFont;
                 }
-
-                int refBaseRowNumber = int.MinValue;
-				if (token.Length > 2)
-					refBaseRowNumber = int.Parse(token[2]);
 
                 string firstToken = token.First();
                 var docOrigin = firstToken.ToDocOrigin();
@@ -116,28 +124,9 @@ namespace XlsxMerge
 
                 // iterate columns
                 int rowNumber = int.Parse(token[1]);
-                int maxColumn = refWorksheet?.ColumnCount ?? 0;
-				for (int cellNumber = 1; cellNumber <= maxColumn; cellNumber++)
-				{
-					var currentCell = refWorksheet.Cell(rowNumber, cellNumber);
-                    var columnName = $"C{cellNumber}";
-                    var currentCellDgv = dgvRow.Cells[columnName];
-					currentCellDgv.Value = currentCell.Value2String;
-
-                    var baseWorksheet = parsedWorksheetData[DocOrigin.Base];
-                    if (refBaseRowNumber <= 0 || baseWorksheet == null)
-						continue;
-
-					var baseCell = baseWorksheet.Cell(refBaseRowNumber, cellNumber);
-					if (currentCell.ContentsForDiff3 == baseCell.ContentsForDiff3)
-						continue;
-
-					if (dgvRow.DefaultCellStyle.BackColor == ColorScheme.MineBackground)
-						currentCellDgv.Style.BackColor = ColorScheme.MineHighlight;
-					if (dgvRow.DefaultCellStyle.BackColor == ColorScheme.TheirsBackground)
-						currentCellDgv.Style.BackColor = ColorScheme.TheirsHighlight;
-				}
-			}
+                var baseWorksheet = parsedWorksheetData[DocOrigin.Base];
+                UpdateColumns(rowNumber, refWorksheet, refBaseRowNumber, baseWorksheet, dgvRow);
+            }
 		}
 
         private static IEnumerable<DataGridViewTextBoxColumn> MakeColumns(List<double> columnWidthList)
@@ -193,6 +182,30 @@ namespace XlsxMerge
             }
 
             return columns;
+        }
+
+        private static void UpdateColumns(int rowNumber, ExcelWorksheet? refWorksheet, int refBaseRowNumber, ExcelWorksheet baseWorksheet, DataGridViewRow dgvRow)
+        {
+            int maxColumn = refWorksheet?.ColumnCount ?? 0;
+            for (int cellNumber = 1; cellNumber <= maxColumn; cellNumber++)
+            {
+                var currentCell = refWorksheet.Cell(rowNumber, cellNumber);
+                var columnName = $"C{cellNumber}";
+                var currentCellDgv = dgvRow.Cells[columnName];
+                currentCellDgv.Value = currentCell.Value2String;
+
+                if (refBaseRowNumber <= 0 || baseWorksheet == null)
+                    continue;
+
+                var baseCell = baseWorksheet.Cell(refBaseRowNumber, cellNumber);
+                if (currentCell.ContentsForDiff3 == baseCell.ContentsForDiff3)
+                    continue;
+
+                if (dgvRow.DefaultCellStyle.BackColor == ColorScheme.MineBackground)
+                    currentCellDgv.Style.BackColor = ColorScheme.MineHighlight;
+                if (dgvRow.DefaultCellStyle.BackColor == ColorScheme.TheirsBackground)
+                    currentCellDgv.Style.BackColor = ColorScheme.TheirsHighlight;
+            }
         }
 	}
 }
