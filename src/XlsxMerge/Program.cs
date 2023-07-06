@@ -1,4 +1,9 @@
-﻿namespace NexonKorea.XlsxMerge
+﻿using XlsxMerge.Features.Diffs;
+using XlsxMerge.Model;
+using XlsxMerge.View;
+using XlsxMerge.ViewModel;
+
+namespace XlsxMerge
 {
     internal static class Program
     {
@@ -9,11 +14,11 @@
 
             var args = Environment.GetCommandLineArgs();
 
-            MergeArgumentInfo? argumentInfo = null;
+            ProgramOptions? argumentInfo = null;
             if (args.Length > 1)
             {
-                argumentInfo = new MergeArgumentInfo(args);
-                if (argumentInfo.ComparisonMode == ComparisonMode.Unknown)
+                argumentInfo = ProgramOptions.Parse(args);
+                if (argumentInfo == null || argumentInfo?.ComparisonMode == ComparisonMode.Unknown)
                 {
                     argumentInfo = null;
                     MessageBox.Show("명령줄 인수에 잘못되거나 누락된 값이 있습니다.");
@@ -25,17 +30,21 @@
             if (String.IsNullOrEmpty(exeFolderPath) == false)
                 Directory.SetCurrentDirectory(exeFolderPath);
 
+            PathViewModel pathViewModel = new PathViewModel();
+
             if (argumentInfo != null)
             {
-                var formMainDiff = new FormMainDiff();
-                formMainDiff.MergeArgs = argumentInfo;
+                pathViewModel.DiffPathModel = DiffPathModel.From(argumentInfo);
+                var diffViewModel = new DiffViewModel();
+                var mergeViewModel = new MergeViewModel();
+                var formMainDiff = new FormMainDiff(pathViewModel, diffViewModel, mergeViewModel);
                 Application.Run(formMainDiff);
                 if (formMainDiff.MergeSuccessful)
                     return 0;
             }
             else
             {
-                Application.Run(new FormWelcome());
+                Application.Run(new FormWelcome(pathViewModel));
             }
 
             return 1;

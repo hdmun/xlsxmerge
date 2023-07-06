@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using XlsxMerge.Properties;
 
-namespace NexonKorea.XlsxMerge
+namespace XlsxMerge.View
 {
     partial class FormWelcome
     {
@@ -246,7 +246,7 @@ namespace NexonKorea.XlsxMerge
             // 
             this.textBoxCommandline.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxCommandline.Font = new System.Drawing.Font("Consolas", 11F);
+            this.textBoxCommandline.Font = new System.Drawing.Font("Consolas", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.textBoxCommandline.Location = new System.Drawing.Point(15, 627);
             this.textBoxCommandline.Multiline = true;
             this.textBoxCommandline.Name = "textBoxCommandline";
@@ -279,7 +279,7 @@ namespace NexonKorea.XlsxMerge
             this.buttonPathResult.TabIndex = 2;
             this.buttonPathResult.Text = "...";
             this.buttonPathResult.UseVisualStyleBackColor = true;
-            this.buttonPathResult.Click += new System.EventHandler(this.buttonPathResult_Click);
+            this.buttonPathResult.Click += new System.EventHandler(this.buttonPathXlsx_Click);
             // 
             // textBoxPathResult
             // 
@@ -323,17 +323,17 @@ namespace NexonKorea.XlsxMerge
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("맑은 고딕", 24F, System.Drawing.FontStyle.Bold);
+            this.label7.Font = new System.Drawing.Font("맑은 고딕", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label7.Location = new System.Drawing.Point(121, 24);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(418, 45);
+            this.label7.Size = new System.Drawing.Size(182, 45);
             this.label7.TabIndex = 0;
             this.label7.Text = "XlsxMerge";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Font = new System.Drawing.Font("맑은 고딕", 13F);
+            this.label8.Font = new System.Drawing.Font("맑은 고딕", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.label8.Location = new System.Drawing.Point(124, 78);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(332, 25);
@@ -358,7 +358,7 @@ namespace NexonKorea.XlsxMerge
             this.Controls.Add(this.groupBoxBase);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label1);
-            this.Font = new System.Drawing.Font("맑은 고딕", 9F);
+            this.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "FormWelcome";

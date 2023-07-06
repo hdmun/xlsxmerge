@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace NexonKorea.XlsxMerge
+namespace XlsxMerge
 {
     public class RowRange
     {
@@ -18,13 +18,6 @@ namespace NexonKorea.XlsxMerge
 		TheirsDiffers, // theirs 문서만 다르다.
 		Conflict, // mine + theirs 각각 수정점이 있다.
 	}
-
-	public enum DocOrigin
-    {
-        Base,
-        Mine, // mine = destination = current
-        Theirs, // theirs = source = others
-    }
 
 	public enum WorksheetMergeMode
 	{

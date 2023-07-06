@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Windows.Forms;
+﻿using XlsxMerge.Extensions;
+using XlsxMerge.Features.Diffs;
+using XlsxMerge.Features.Excels;
+using XlsxMerge.Features.Merges;
+using XlsxMerge.ViewModel;
 
-namespace NexonKorea.XlsxMerge
+namespace XlsxMerge
 {
-	class MergeResultPreviewer
+    class MergeResultPreviewer
 	{
+        private static readonly Font StrikeOutFont = new (SystemFonts.DefaultFont, FontStyle.Strikeout);
 
-		public static void RefreshDataGridViewContents(XlsxMergeDecision xlsxMergeDecision,
-			XlsxMergeDecision.SheetMergeDecision sheetMergeDecision,
+        public static void RefreshDataGridViewContents(
+            DiffViewModel diffViewModel,
+			SheetMergeDecision sheetMergeDecision,
 			DataGridView dataGridView,
 			MergeResultPreviewData previewData)
 		{
@@ -18,148 +20,192 @@ namespace NexonKorea.XlsxMerge
 				return;
 
 			var sheetResult = sheetMergeDecision.SheetDiffResult;
-			var parsedWorksheetData = xlsxMergeDecision.DiffResult.GetParsedWorksheetData(sheetResult.WorksheetName);
+			var parsedWorksheetData = diffViewModel.GetWorksheets(sheetResult.WorksheetName);
 
-			// 열 생성
+            // 열 생성
+            dataGridView.Rows.Clear();
+            dataGridView.Columns.Clear();
 
-			dataGridView.Rows.Clear();
-			dataGridView.Columns.Clear();
+            var columnWidthList = diffViewModel.CalcColumnWidthList(sheetResult.WorksheetName);
+            var columns = MakeColumns(columnWidthList);
+            dataGridView.Columns.AddRange(columns.ToArray());
 
-			// 기본 열
-			dataGridView.Columns.Add("hunk_no", "변경 위치");
-			dataGridView.Columns["hunk_no"].Width = 80;
-			dataGridView.Columns.Add("source_line", "소스(행)");
-			dataGridView.Columns["source_line"].Width = 80;
-
-			// C1, C2, ... 
-			var unifiedColumnWidthList = new List<double>();
-			foreach (var eachWorksheet in parsedWorksheetData.Values)
-			{
-				if (eachWorksheet == null || eachWorksheet.GetRowCount() == 0)
-					continue;
-
-				int elemToCopy = eachWorksheet.ColumnWidthList.Count - unifiedColumnWidthList.Count;
-				if (elemToCopy < 1)
-					continue;
-
-				unifiedColumnWidthList.AddRange(eachWorksheet.ColumnWidthList.GetRange(unifiedColumnWidthList.Count, elemToCopy));
-			}
-
-			if (unifiedColumnWidthList.Count == 0)
-			{
-				// 모두 빈 워크시트입니다.
-				dataGridView.Columns.Add("C1", "정보");
-				dataGridView.Columns["C1"].Width = 400;
-				int rowIndex = dataGridView.Rows.Add();
-				dataGridView.Rows[rowIndex].Cells["C1"].Value = "(빈 워크시트입니다.)";
-				return;
-			}
-
-			for (int i = 1; i <= unifiedColumnWidthList.Count; i++)
-			{
-				string columnName = HelperFunctions.GetExcelColumnName(i);
-				int columnWidth = (int)(unifiedColumnWidthList[i - 1]);
-				dataGridView.Columns.Add("C" + i.ToString(), columnName + "::[]");
-				dataGridView.Columns["C" + i.ToString()].Width = columnWidth;
-			}
-
-			foreach (DataGridViewColumn eachCol in dataGridView.Columns)
-				eachCol.SortMode = DataGridViewColumnSortMode.NotSortable;
-
+            if (columnWidthList.Count == 0)
+            {
+                int rowIndex = dataGridView.Rows.Add();
+                dataGridView.Rows[rowIndex].Cells["C1"].Value = "(빈 워크시트입니다.)";
+                return;
+            }
 
 			var cachedTempPreviewLines = previewData.RowInfoList;
 
-			Font strikeoutFont = new Font(SystemFonts.DefaultFont, FontStyle.Strikeout);
-			dataGridView.RowCount = cachedTempPreviewLines.Count();
-			for (int currentRowIdx = 0; currentRowIdx < cachedTempPreviewLines.Count(); currentRowIdx++)
+            // iterate rows
+			dataGridView.RowCount = cachedTempPreviewLines?.Count() ?? 0;
+			for (int currentRowIdx = 0; currentRowIdx < dataGridView.RowCount; currentRowIdx++)
 			{
 				var eachRow = cachedTempPreviewLines[currentRowIdx];
-				var dgvRow = dataGridView.Rows[currentRowIdx];
+				DataGridViewRow dgvRow = dataGridView.Rows[currentRowIdx];
 
-				string[] token = eachRow.Split(new char[] { ':' });
-				dgvRow.Cells["hunk_no"].Value = "";
+                // set 'hunk_no' cell
+                var hunkNoCell = dgvRow.Cells["hunk_no"];
+                hunkNoCell.Value = "";
 				{
 					var candidateHunkIdx = previewData.GetHunkIdxByRowNumber(currentRowIdx);
                     if (candidateHunkIdx >= 0)
                     {
                         if (sheetMergeDecision.HunkMergeDecisionList[candidateHunkIdx].DocMergeOrder == null)
-                            dgvRow.Cells["hunk_no"].Style.SelectionBackColor = Color.Red;
+                            hunkNoCell.Style.SelectionBackColor = Color.Red;
                         else
-                            dgvRow.Cells["hunk_no"].Style.SelectionBackColor = Color.LightSlateGray;
-                        dgvRow.Cells["hunk_no"].Value = $"#{candidateHunkIdx + 1}";
+                            hunkNoCell.Style.SelectionBackColor = Color.LightSlateGray;
+
+                        hunkNoCell.Value = $"#{candidateHunkIdx + 1}";
                     }
 				}
 
-				string sourceLineText = token[0];
-				if (token.Length == 1)
+                // parse token
+                string[] token = eachRow.Split(new char[] { ':' });
+                if (token.Length == 1)
 				{
 					dgvRow.DefaultCellStyle.BackColor = Color.Yellow;
-					dgvRow.Cells["source_line"].Value = sourceLineText;
+					dgvRow.Cells["source_line"].Value = token.First();
 					continue;
 				}
 
+                // TODO: 정리필요
+                string sourceLineText = token.First();
 				if (token.Length > 1)
 					sourceLineText = sourceLineText + $": {token[1]}";
 
-				bool isRemovedLine = token.Length > 2 && token[2].EndsWith("-1");
-                if (isRemovedLine)
-                    sourceLineText = sourceLineText + " [-]";
+                bool isRemovedLine = false;
+
                 int refBaseRowNumber = int.MinValue;
 				if (token.Length > 2)
-					refBaseRowNumber = int.Parse(token[2]);
+                {
+                    var rowNumberToken = token[2];
+                    refBaseRowNumber = int.Parse(rowNumberToken);
 
-				Color backColor = Color.White;
-				int rowNumber = int.Parse(token[1]);
-				var refWorksheet = parsedWorksheetData[DocOrigin.Base];
-				if (token[0].StartsWith("base"))
-				{
-					refWorksheet = parsedWorksheetData[DocOrigin.Base];
-					backColor = ColorScheme.BaseBackground;
-				}
-				else if (token[0].StartsWith("mine"))
-				{
-					refWorksheet = parsedWorksheetData[DocOrigin.Mine];
-					backColor = ColorScheme.MineBackground;
-				}
-				else if (token[0].StartsWith("theirs"))
-				{
-					refWorksheet = parsedWorksheetData[DocOrigin.Theirs];
-					backColor = ColorScheme.TheirsBackground;
-				}
-				else
-				{
-					sourceLineText = "=";
-				}
+                    isRemovedLine = rowNumberToken.EndsWith("-1");
+                }
 
-				dgvRow.DefaultCellStyle.BackColor = backColor;
-				if (isRemovedLine)
-					dgvRow.DefaultCellStyle.Font = strikeoutFont;
-				dgvRow.Cells["source_line"].Value = sourceLineText;
+                if (isRemovedLine)
+                {
+                    sourceLineText = sourceLineText + " [-]";
+                    dgvRow.DefaultCellStyle.Font = StrikeOutFont;
+                }
 
-				if (refWorksheet.GetRowCount() == 0)
+                string firstToken = token.First();
+                var docOrigin = firstToken.ToDocOrigin();
+                if (docOrigin is null)
+                    sourceLineText = "=";
+
+                // set 'source_line' cell
+                dgvRow.Cells["source_line"].Value = sourceLineText;
+
+                // set back color
+                Color backColor = docOrigin switch
+                {
+                    DocOrigin.Base => ColorScheme.BaseBackground,
+                    DocOrigin.Mine => ColorScheme.MineBackground,
+                    DocOrigin.Theirs => ColorScheme.TheirsBackground,
+                    _ => Color.White
+                };
+                dgvRow.DefaultCellStyle.BackColor = backColor;
+
+                // get refWorksheet
+                var refWorksheet = docOrigin switch
+                {
+                    DocOrigin.Base => parsedWorksheetData[DocOrigin.Base],
+                    DocOrigin.Mine => parsedWorksheetData[DocOrigin.Mine],
+                    DocOrigin.Theirs => parsedWorksheetData[DocOrigin.Theirs],
+                    _ => parsedWorksheetData[DocOrigin.Base]
+                };
+                if (refWorksheet?.RowCount == 0)
 					continue;
 
-
-				int maxColumn = refWorksheet.GetColumnCount();
-				for (int cellNumber = 1; cellNumber <= maxColumn; cellNumber++)
-				{
-					var currentCell = refWorksheet.Cell(rowNumber, cellNumber);
-					var currentCellDgv = dgvRow.Cells["C" + cellNumber.ToString()];
-					currentCellDgv.Value = currentCell.Value2String;
-
-					if (refBaseRowNumber <= 0 || parsedWorksheetData[DocOrigin.Base] == null)
-						continue;
-
-					var baseCell = parsedWorksheetData[DocOrigin.Base].Cell(refBaseRowNumber, cellNumber);
-					if (currentCell.ContentsForDiff3 == baseCell.ContentsForDiff3)
-						continue;
-
-					if (dgvRow.DefaultCellStyle.BackColor == ColorScheme.MineBackground)
-						currentCellDgv.Style.BackColor = ColorScheme.MineHighlight;
-					if (dgvRow.DefaultCellStyle.BackColor == ColorScheme.TheirsBackground)
-						currentCellDgv.Style.BackColor = ColorScheme.TheirsHighlight;
-				}
-			}
+                // iterate columns
+                int rowNumber = int.Parse(token[1]);
+                var baseWorksheet = parsedWorksheetData[DocOrigin.Base];
+                UpdateColumns(rowNumber, refWorksheet, refBaseRowNumber, baseWorksheet, dgvRow);
+            }
 		}
+
+        private static IEnumerable<DataGridViewTextBoxColumn> MakeColumns(List<double> columnWidthList)
+        {
+            var columns = new List<DataGridViewTextBoxColumn>();
+            // 기본 열
+            var defaultColumn = new DataGridViewTextBoxColumn
+            {
+                Name = "hunk_no",
+                HeaderText = "변경 위치",
+                Width = 80,
+                SortMode = DataGridViewColumnSortMode.NotSortable
+            };
+            columns.Add(defaultColumn);
+
+            defaultColumn = new DataGridViewTextBoxColumn
+            {
+                Name = "source_line",
+                HeaderText = "소스(행)",
+                Width = 80,
+                SortMode = DataGridViewColumnSortMode.NotSortable
+            };
+            columns.Add(defaultColumn);
+
+            if (columnWidthList.Count == 0)
+            {
+                // 모두 빈 워크시트입니다.
+                var emptyColumn = new DataGridViewTextBoxColumn
+                {
+                    Name = "C1",
+                    HeaderText = "정보",
+                    Width = 400,
+                    SortMode = DataGridViewColumnSortMode.NotSortable
+                };
+                columns.Add(emptyColumn);
+                return columns;
+            }
+
+            for (int i = 0; i < columnWidthList.Count; i++)
+            {
+                int columnNo = i + 1;
+                string columnText = HelperFunctions.GetExcelColumnName(columnNo);
+                int columnWidth = (int)(columnWidthList[i]);
+
+                var dataGridViewTextBoxColumn = new DataGridViewTextBoxColumn
+                {
+                    Name = $"C{columnNo}",
+                    HeaderText = $"{columnText}::[]",
+                    Width = columnWidth,
+                    SortMode = DataGridViewColumnSortMode.NotSortable
+                };
+                columns.Add(dataGridViewTextBoxColumn);
+            }
+
+            return columns;
+        }
+
+        private static void UpdateColumns(int rowNumber, ExcelWorksheet? refWorksheet, int refBaseRowNumber, ExcelWorksheet baseWorksheet, DataGridViewRow dgvRow)
+        {
+            int maxColumn = refWorksheet?.ColumnCount ?? 0;
+            for (int cellNumber = 1; cellNumber <= maxColumn; cellNumber++)
+            {
+                var currentCell = refWorksheet.Cell(rowNumber, cellNumber);
+                var columnName = $"C{cellNumber}";
+                var currentCellDgv = dgvRow.Cells[columnName];
+                currentCellDgv.Value = currentCell.Value2String;
+
+                if (refBaseRowNumber <= 0 || baseWorksheet == null)
+                    continue;
+
+                var baseCell = baseWorksheet.Cell(refBaseRowNumber, cellNumber);
+                if (currentCell.ContentsForDiff3 == baseCell.ContentsForDiff3)
+                    continue;
+
+                if (dgvRow.DefaultCellStyle.BackColor == ColorScheme.MineBackground)
+                    currentCellDgv.Style.BackColor = ColorScheme.MineHighlight;
+                if (dgvRow.DefaultCellStyle.BackColor == ColorScheme.TheirsBackground)
+                    currentCellDgv.Style.BackColor = ColorScheme.TheirsHighlight;
+            }
+        }
 	}
 }

@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using XlsxMerge.Features.Diffs;
+using XlsxMerge.Features.Merges;
 
-namespace NexonKorea.XlsxMerge
+namespace XlsxMerge
 {
-	class MergeResultPreviewData
+    class MergeResultPreviewData
 	{
-		public List<String> RowInfoList = new List<string>();
-		public List<int> HunkStartsPosList = new List<int>(); // diff hunk navigate에 사용
-		public List<int> HunkEndsPosList = new List<int>(); // diff hunk navigate에 사용
+		public readonly List<String> RowInfoList = new List<string>();
+		public readonly List<int> HunkStartsPosList = new List<int>(); // diff hunk navigate에 사용
+		public readonly List<int> HunkEndsPosList = new List<int>(); // diff hunk navigate에 사용
 
 		public int GetHunkIdxByRowNumber(int dataGridRowNumber)
 		{
@@ -22,7 +24,7 @@ namespace NexonKorea.XlsxMerge
 			return candidateHunkIdx;
 		}
 
-		public static MergeResultPreviewData GeneratePreviewData(XlsxMergeDecision.SheetMergeDecision sheetDecision,
+		public static MergeResultPreviewData GeneratePreviewData(SheetMergeDecision sheetDecision,
 			int worksheetBaseRowCount, bool hideDeletedLines, bool hideEqualLines)
 		{
 			if (sheetDecision == null)
