@@ -96,7 +96,7 @@ public class SheetDiffResult
         {
             if (HasMineDoc)
             {
-                if (HasMineDiffers)
+                if (HasMineDiffers == false)
                     candidateList.Add(WorksheetMergeMode.Unchanged); // a1
                 else
                     candidateList.Add(WorksheetMergeMode.Merge); // a2
