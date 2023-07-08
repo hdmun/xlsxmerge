@@ -28,7 +28,6 @@ namespace XlsxMerge.View
             _mergeViewModel = mergeViewModel;
         }
 
-		XlsxMergeDecision _xlsxMergeDecision;
 		Dictionary<String, MergeResultPreviewData> previewDataCache = new Dictionary<string, MergeResultPreviewData>();
 		public bool MergeSuccessful = false;
 
@@ -49,6 +48,9 @@ namespace XlsxMerge.View
 
             labelPathResult.BindingVisible(_pathViewModel, nameof(_pathViewModel.VisibleResultPath));
             labelPathResult.BindingText(_pathViewModel, nameof(_pathViewModel.ResultPathLabelText));
+
+            // checkBoxHideRemovedLines.BindingChecked(_diffViewModel, nameof(_diffViewModel.IsHideRemovedLines));
+            // checkBoxHideEqualLines.BindingChecked(_diffViewModel, nameof(_diffViewModel.IsHideEqualLines));
 
             if (_pathViewModel.VisibleResultPath)
                 buttonSaveMergeResult.Text = "머지 결과 저장 후 닫기";
@@ -100,7 +102,8 @@ namespace XlsxMerge.View
             var compareResults = _diffViewModel.DiffExcels(_pathViewModel.ComparisonMode);
 
             FakeBackgroundWorker.OnUpdateProgress("xlsx 파일 비교", "비교 완료. 기본 설정 진행 중..");
-			_xlsxMergeDecision = new XlsxMergeDecision(compareResults);
+
+            _mergeViewModel.XlsxMergeDecision = new XlsxMergeDecision(compareResults);
 
             var comparisonModeForResult = _pathViewModel.ComparisonMode;
             foreach (var eachSheetResult in compareResults)
@@ -135,28 +138,41 @@ namespace XlsxMerge.View
                 }
             }
 
-			FakeBackgroundWorker.OnUpdateProgress(null);
-		}
+            FakeBackgroundWorker.OnUpdateProgress(null);
+        }
 
-		private void listViewWorksheets_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			ChangeFocusedHunk(0);
+        private void listViewWorksheets_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // 선택한 워크시트 인덱스 업데이트
+            if (listViewWorksheets.SelectedIndices.Count > 0)
+            {
+                int selectedWorksheetIndex = listViewWorksheets.SelectedIndices[0];
+                if (selectedWorksheetIndex >= 0)
+                {
+                    _diffViewModel.SelectedWorksheetIndex = selectedWorksheetIndex;
+                }
+            }
+
+            // todo: 얘네들도 데이터 바인딩으로 변경해야함
+
+            ChangeFocusedHunk(0);
 			UpdatePreviewWindow();
 			HighlightFocusedHunk();
 		}
 
 		private void checkBoxShowFirstRowContentsOnTop_CheckedChanged(object sender, EventArgs e)
 		{
-			UpdateDataGridViewColumnName();
+            // todo: move to MergeViewModel
+            UpdateDataGridViewColumnName();
 		}
 
 		private void buttonSaveMergeResult_Click(object sender, EventArgs e)
 		{
-			int unResolvedConflictCount = _xlsxMergeDecision.CalcUnResolvedConflictCount();
+			int unResolvedConflictCount = _mergeViewModel.XlsxMergeDecision.CalcUnResolvedConflictCount();
 			if (unResolvedConflictCount > 0)
 			{
-				if (MessageBox.Show($"충돌 상태로 둔 변경 지점이 {unResolvedConflictCount}곳 있습니다. 이 상태로 결과를 저장할까요?", "충돌 상태",
-						MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                string message = $"충돌 상태로 둔 변경 지점이 {unResolvedConflictCount}곳 있습니다. 이 상태로 결과를 저장할까요?";
+                if (MessageBox.Show(message, "충돌 상태", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
 					return;
 			}
 
@@ -166,7 +182,7 @@ namespace XlsxMerge.View
             _pathViewModel.ResultPath = mergedFilePath;
 
             XlsxMergeCommand cmd = new XlsxMergeCommand();
-			cmd.Init(_xlsxMergeDecision);
+			cmd.Init(_mergeViewModel.XlsxMergeDecision);
 
 			using (var runner = new XlsxMergeCommandRunner())
 			{
@@ -279,13 +295,19 @@ namespace XlsxMerge.View
 
 		private void checkBoxHideRemovedLines_CheckedChanged(object sender, EventArgs e)
 		{
-			UpdatePreviewWindow();
+            // TODO: DiffViewModel databinding
+            _diffViewModel.IsHideRemovedLines = checkBoxHideRemovedLines.Checked;
+
+            UpdatePreviewWindow();
 			HighlightFocusedHunk();
 		}
 
 		private void checkBoxHideEqualLines_CheckedChanged(object sender, EventArgs e)
 		{
-			UpdatePreviewWindow();
+            // TODO: DiffViewModel databinding
+            _diffViewModel.IsHideEqualLines = checkBoxHideEqualLines.Checked;
+
+            UpdatePreviewWindow();
 			HighlightFocusedHunk();
 		}
 
@@ -337,7 +359,6 @@ namespace XlsxMerge.View
 			contextMenuStrip1.Show(linkLabelChangeMergeOrder, new Point(0, 0));
 		}
 
-
 		private void HunkDecisionClick(object sender, EventArgs eventArgs)
 		{
 			var sheetDecision = getCurrentSheetDecision();
@@ -373,9 +394,8 @@ namespace XlsxMerge.View
 			if (selectedWorksheetIndex < 0)
 				return null;
 
-			return _xlsxMergeDecision.SheetMergeDecisionList[selectedWorksheetIndex];
+			return _mergeViewModel.XlsxMergeDecision.SheetMergeDecisionList[selectedWorksheetIndex];
 		}
-
 
 		private void UpdatePreviewWindow()
 		{

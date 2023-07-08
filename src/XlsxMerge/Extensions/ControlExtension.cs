@@ -21,4 +21,9 @@ public static class ControlExtension
     {
         return control.DataBindings.Add(nameof(control.Enabled), dataSource, dataMember);
     }
+
+    public static Binding BindingChecked(this CheckBox checkBox, object dataSource, string dataMember)
+    {
+        return checkBox.DataBindings.Add(nameof(checkBox.Checked), dataSource, dataMember, false, DataSourceUpdateMode.OnPropertyChanged);
+    }
 }

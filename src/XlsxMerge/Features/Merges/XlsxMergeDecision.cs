@@ -2,7 +2,7 @@
 
 namespace XlsxMerge.Features.Merges
 {
-    class XlsxMergeDecision
+    public class XlsxMergeDecision
     {
         public readonly List<SheetMergeDecision> SheetMergeDecisionList;
 

@@ -13,9 +13,56 @@ public class DiffViewModel : INotifyPropertyChanged
 
     private readonly Dictionary<DocOrigin, ExcelFile> _excelFiles;
 
+    private bool _isHideRemovedLines;
+    private bool _isHideEqualLines;
+    private int _selectedWorksheetIndex;
+
     public DiffViewModel()
     {
         _excelFiles = new();
+        _selectedWorksheetIndex = -1;
+    }
+
+    // 삭제된 행 표시하지 않기
+    public bool IsHideRemovedLines
+    {
+        get => _isHideRemovedLines;
+        set
+        {
+            if (_isHideRemovedLines != value)
+            {
+                _isHideRemovedLines = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    // 동일한 행 표시하지 않기
+    public bool IsHideEqualLines
+    {
+        get => _isHideEqualLines;
+        set
+        {
+            if (_isHideEqualLines != value)
+            {
+                _isHideEqualLines = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    // 선택한 워크시트
+    public int SelectedWorksheetIndex
+    {
+        get => _selectedWorksheetIndex;
+        set
+        {
+            if (_selectedWorksheetIndex != value)
+            {
+                _selectedWorksheetIndex = value;
+                // todo: notify property changed
+            }
+        }
     }
 
     public void Read(ComparisonMode comparison, string basePath, string minePath, string theirsPath)
