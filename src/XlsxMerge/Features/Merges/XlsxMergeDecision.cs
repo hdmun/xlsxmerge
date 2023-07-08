@@ -15,15 +15,9 @@ namespace XlsxMerge.Features.Merges
 
         public int CalcUnResolvedConflictCount()
         {
-            int unResolvedConflictCount = 0;
-            foreach (var mergeDecision in SheetMergeDecisionList)
-            {
-                if (mergeDecision.MergeModeDecision != WorksheetMergeMode.Merge)
-                    continue;
-
-                unResolvedConflictCount += mergeDecision.HunkMergeDecisionList.Count(x => x == null);
-            }
-            return unResolvedConflictCount;
+            return SheetMergeDecisionList
+                .Where(x => x.MergeModeDecision == WorksheetMergeMode.Merge)
+                .Sum(x => x.GetConflictCount());
         }
     }
 }

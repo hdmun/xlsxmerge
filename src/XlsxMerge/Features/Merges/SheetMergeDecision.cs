@@ -22,4 +22,9 @@ public class SheetMergeDecision
         foreach (var hunkInfo in sheetDiffResult.HunkList)
             HunkMergeDecisionList.Add(new HunkMergeDecision(hunkInfo));
     }
+
+    public int GetConflictCount()
+    {
+        return HunkMergeDecisionList.Count(x => x.IsConflict);
+    }
 }
