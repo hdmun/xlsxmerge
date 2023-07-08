@@ -53,7 +53,7 @@ namespace XlsxMerge
 					var candidateHunkIdx = previewData.GetHunkIdxByRowNumber(currentRowIdx);
                     if (candidateHunkIdx >= 0)
                     {
-                        if (sheetMergeDecision.HunkMergeDecisionList[candidateHunkIdx].DocMergeOrder == null)
+                        if (sheetMergeDecision.HunkMergeDecisionList[candidateHunkIdx].IsConflict)
                             hunkNoCell.Style.SelectionBackColor = Color.Red;
                         else
                             hunkNoCell.Style.SelectionBackColor = Color.LightSlateGray;

@@ -75,7 +75,7 @@ namespace XlsxMerge.Features.Merges
             foreach (var hunk in sheetMergeDecision.HunkMergeDecisionList.OrderBy(r => -r.BaseHunkInfo.rowRangeMap[_docOriginMergeInto].RowNumber))
             {
                 int currentRowNumber = hunk.BaseHunkInfo.rowRangeMap[_docOriginMergeInto].RowNumber;
-                if (hunk.DocMergeOrder == null)
+                if (hunk.IsConflict)
                 {
                     CommandList.Add(XlsxMergeCommandItem.InsertText(_docOriginMergeInto, sheetMergeDecision.WorksheetName, "[XlsxMerge충돌] 충돌 지점 시작 >>>", currentRowNumber));
                     currentRowNumber++;

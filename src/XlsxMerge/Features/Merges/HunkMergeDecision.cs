@@ -4,47 +4,68 @@ namespace XlsxMerge.Features.Merges;
 
 public class HunkMergeDecision
 {
-    public List<DocOrigin> DocMergeOrder = new List<DocOrigin>(); // null = Conflict 상태로 둡니다. Empty = 모두 삭제. 
+    public List<DocOrigin> DocMergeOrder; // null = Conflict 상태로 둡니다. Empty = 모두 삭제. 
     public readonly DiffHunkInfo BaseHunkInfo;
-    public List<List<DocOrigin>> DocMergeOrderCandidates = null; // 이 Hunk에서 선택 가능한 document merge orders.
+    public readonly List<List<DocOrigin>> DocMergeOrderCandidates; // 이 Hunk에서 선택 가능한 document merge orders.
 
     public HunkMergeDecision(DiffHunkInfo baseHunkInfo)
     {
-        BaseHunkInfo = baseHunkInfo;
-        BuildDocMergeOrderCandidates();
-    }
+        // bse에 비해 mine/theirs 모두 변경사항이 있고, 그 둘이 같으면 Mine을 사용한다.
+        var docMergeOrder = new List<DocOrigin>();
+        switch (baseHunkInfo.hunkStatus)
+        {
+            case Diff3HunkStatus.BaseDiffers:
+            case Diff3HunkStatus.MineDiffers:
+                docMergeOrder.Add(DocOrigin.Mine);
+                break;
+            case Diff3HunkStatus.TheirsDiffers:
+                docMergeOrder.Add(DocOrigin.Theirs);
+                break;
+            case Diff3HunkStatus.Conflict:
+                docMergeOrder = null;
+                break;
+        }
 
-    private void BuildDocMergeOrderCandidates()
-    {
-        DocMergeOrderCandidates = new List<List<DocOrigin>>();
+        DocMergeOrder = docMergeOrder;
+
+        BaseHunkInfo = baseHunkInfo;
+
+        var docMergeOrderCandidates = new List<List<DocOrigin>>();
 
         // add
-        if (BaseHunkInfo.hunkStatus == Diff3HunkStatus.Conflict)
-            DocMergeOrderCandidates.Add(null);
+        if (baseHunkInfo.hunkStatus == Diff3HunkStatus.Conflict)
+            docMergeOrderCandidates.Add(null);
 
-        DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Mine });
-        DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Base });
-        DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Theirs });
-        DocMergeOrderCandidates.Add(new List<DocOrigin>()); // "Delete" Menu
+        docMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Mine });
+        docMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Base });
+        docMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Theirs });
+        docMergeOrderCandidates.Add(new List<DocOrigin>()); // "Delete" Menu
 
-        DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Mine, DocOrigin.Base });
-        DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Mine, DocOrigin.Base, DocOrigin.Theirs });
-        DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Mine, DocOrigin.Theirs });
-        DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Mine, DocOrigin.Theirs, DocOrigin.Base });
+        docMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Mine, DocOrigin.Base });
+        docMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Mine, DocOrigin.Base, DocOrigin.Theirs });
+        docMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Mine, DocOrigin.Theirs });
+        docMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Mine, DocOrigin.Theirs, DocOrigin.Base });
 
-        DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Base, DocOrigin.Mine });
-        DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Base, DocOrigin.Mine, DocOrigin.Theirs });
-        DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Base, DocOrigin.Theirs });
-        DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Base, DocOrigin.Theirs, DocOrigin.Mine });
+        docMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Base, DocOrigin.Mine });
+        docMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Base, DocOrigin.Mine, DocOrigin.Theirs });
+        docMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Base, DocOrigin.Theirs });
+        docMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Base, DocOrigin.Theirs, DocOrigin.Mine });
 
-        DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Theirs, DocOrigin.Base });
-        DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Theirs, DocOrigin.Base, DocOrigin.Mine });
-        DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Theirs, DocOrigin.Mine });
-        DocMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Theirs, DocOrigin.Mine, DocOrigin.Base });
+        docMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Theirs, DocOrigin.Base });
+        docMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Theirs, DocOrigin.Base, DocOrigin.Mine });
+        docMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Theirs, DocOrigin.Mine });
+        docMergeOrderCandidates.Add(new List<DocOrigin>() { DocOrigin.Theirs, DocOrigin.Mine, DocOrigin.Base });
 
         // exclude
-        var docOriginsToExclude = BaseHunkInfo.ToExcludeDocOrigins();
+        var docOriginsToExclude = baseHunkInfo.ToExcludeDocOrigins();
         foreach (var docOrigin in docOriginsToExclude)
-            DocMergeOrderCandidates.RemoveAll(r => r != null && r.Contains(docOrigin));
+            docMergeOrderCandidates.RemoveAll(r => r != null && r.Contains(docOrigin));
+
+        DocMergeOrderCandidates = docMergeOrderCandidates;
+    }
+
+    public bool IsConflict
+    {
+        get => DocMergeOrder is null;
     }
 }
