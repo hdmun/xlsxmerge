@@ -11,6 +11,28 @@ public class DiffHunkInfo
         rowRangeMap = new();
     }
 
+    public void Add(DocOrigin docOrigin, RowRange rowRange)
+    {
+        rowRangeMap.Add(docOrigin, rowRange);
+    }
+
+    public RowRange? GetRowRange(DocOrigin docOrigin)
+    {
+        return rowRangeMap.TryGetValue(docOrigin, out var rowRange) ? rowRange : null;
+    }
+
+    public int GetRowNumber(DocOrigin docOrigin)
+    {
+        var rowRange = GetRowRange(docOrigin);
+        return rowRange?.RowNumber ?? 0;
+    }
+
+    public int GetRowCount(DocOrigin docOrigin)
+    {
+        var rowRange = GetRowRange(docOrigin);
+        return rowRange?.RowCount ?? 0;
+    }
+
     public IEnumerable<DocOrigin> ToExcludeDocOrigins()
     {
         var docOriginsToExclude = new HashSet<DocOrigin>();

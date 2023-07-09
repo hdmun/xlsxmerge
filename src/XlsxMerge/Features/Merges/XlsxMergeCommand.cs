@@ -62,47 +62,61 @@ namespace XlsxMerge.Features.Merges
 
         private int AddRowCopyCommand(DocOrigin docOriginSource, string worksheetName, int rowNumberInsertAt, HunkMergeDecision hunk)
         {
-            var rowRange = hunk.BaseHunkInfo.rowRangeMap[docOriginSource];
-            if (docOriginSource != _docOriginMergeInto && rowRange.RowCount > 0)
-                CommandList.Add(XlsxMergeCommandItem.CopyRow(docOriginSource, _docOriginMergeInto, worksheetName, rowRange.RowNumber, rowRange.RowCount, rowNumberInsertAt));
-            return rowNumberInsertAt + rowRange.RowCount;
+            int rowNumber = hunk.BaseHunkInfo.GetRowNumber(docOriginSource);
+            int rowCount = hunk.BaseHunkInfo.GetRowCount(docOriginSource);
+            if (docOriginSource != _docOriginMergeInto && rowCount > 0)
+                CommandList.Add(XlsxMergeCommandItem.CopyRow(docOriginSource, _docOriginMergeInto, worksheetName, rowCount, rowCount, rowNumberInsertAt));
+
+            return rowNumberInsertAt + rowCount;
         }
 
         public void ProcessMergeDecision(SheetMergeDecision sheetMergeDecision)
         {
             // 맨 끝 변경사항부터 첫 변경사항으로 적용합니다.
             // 이 방법을 사용할 경우 행 추가/삭제로 인한 줄 번호 재계산을 할 필요가 없어집니다.
-            foreach (var hunk in sheetMergeDecision.HunkMergeDecisionList.OrderBy(r => -r.BaseHunkInfo.rowRangeMap[_docOriginMergeInto].RowNumber))
+
+            var worksheetName = sheetMergeDecision.WorksheetName;
+            var hunkMergeDecisionList = sheetMergeDecision.HunkMergeDecisionList
+                .OrderBy(r => -r.BaseHunkInfo.GetRowNumber(_docOriginMergeInto));
+            foreach (var hunk in hunkMergeDecisionList)
             {
-                int currentRowNumber = hunk.BaseHunkInfo.rowRangeMap[_docOriginMergeInto].RowNumber;
+                int currentRowNumber = hunk.BaseHunkInfo.GetRowNumber(_docOriginMergeInto);
                 if (hunk.IsConflict)
                 {
-                    CommandList.Add(XlsxMergeCommandItem.InsertText(_docOriginMergeInto, sheetMergeDecision.WorksheetName, "[XlsxMerge충돌] 충돌 지점 시작 >>>", currentRowNumber));
+                    var commandText = XlsxMergeCommandItem.InsertText(_docOriginMergeInto, worksheetName, "[XlsxMerge충돌] 충돌 지점 시작 >>>", currentRowNumber);
+                    CommandList.Add(commandText);
                     currentRowNumber++;
 
-                    CommandList.Add(XlsxMergeCommandItem.InsertText(_docOriginMergeInto, sheetMergeDecision.WorksheetName, ">Base<", currentRowNumber));
+                    commandText = XlsxMergeCommandItem.InsertText(_docOriginMergeInto, worksheetName, ">Base<", currentRowNumber);
+                    CommandList.Add(commandText);
                     currentRowNumber++;
-                    currentRowNumber = AddRowCopyCommand(DocOrigin.Base, sheetMergeDecision.WorksheetName, currentRowNumber, hunk);
+                    currentRowNumber = AddRowCopyCommand(DocOrigin.Base, worksheetName, currentRowNumber, hunk);
 
-                    CommandList.Add(XlsxMergeCommandItem.InsertText(_docOriginMergeInto, sheetMergeDecision.WorksheetName, ">Mine(Destination)<", currentRowNumber));
+                    commandText = XlsxMergeCommandItem.InsertText(_docOriginMergeInto, worksheetName, ">Mine(Destination)<", currentRowNumber);
+                    CommandList.Add(commandText);
                     currentRowNumber++;
-                    currentRowNumber = AddRowCopyCommand(DocOrigin.Mine, sheetMergeDecision.WorksheetName, currentRowNumber, hunk);
+                    currentRowNumber = AddRowCopyCommand(DocOrigin.Mine, worksheetName, currentRowNumber, hunk);
 
-                    CommandList.Add(XlsxMergeCommandItem.InsertText(_docOriginMergeInto, sheetMergeDecision.WorksheetName, ">Theirs(Source)<", currentRowNumber));
+                    commandText = XlsxMergeCommandItem.InsertText(_docOriginMergeInto, worksheetName, ">Theirs(Source)<", currentRowNumber);
+                    CommandList.Add(commandText);
                     currentRowNumber++;
-                    currentRowNumber = AddRowCopyCommand(DocOrigin.Theirs, sheetMergeDecision.WorksheetName, currentRowNumber, hunk);
+                    currentRowNumber = AddRowCopyCommand(DocOrigin.Theirs, worksheetName, currentRowNumber, hunk);
 
-                    CommandList.Add(XlsxMergeCommandItem.InsertText(_docOriginMergeInto, sheetMergeDecision.WorksheetName, "<<< 충돌 지점 끝", currentRowNumber));
+                    commandText = XlsxMergeCommandItem.InsertText(_docOriginMergeInto, worksheetName, "<<< 충돌 지점 끝", currentRowNumber);
+                    CommandList.Add(commandText);
                     currentRowNumber++;
                 }
                 else
                 {
                     foreach (var docOrigin in hunk.DocMergeOrder)
-                        currentRowNumber = AddRowCopyCommand(docOrigin, sheetMergeDecision.WorksheetName, currentRowNumber, hunk);
+                        currentRowNumber = AddRowCopyCommand(docOrigin, worksheetName, currentRowNumber, hunk);
 
-                    if (hunk.DocMergeOrder.Contains(_docOriginMergeInto) == false && hunk.BaseHunkInfo.rowRangeMap[_docOriginMergeInto].RowCount > 0)
-                        CommandList.Add(XlsxMergeCommandItem.DeleteRow(_docOriginMergeInto, sheetMergeDecision.WorksheetName,
-                            currentRowNumber, hunk.BaseHunkInfo.rowRangeMap[_docOriginMergeInto].RowCount));
+                    var rowCount = hunk.BaseHunkInfo.GetRowCount(_docOriginMergeInto);
+                    if (hunk.DocMergeOrder.Contains(_docOriginMergeInto) == false && rowCount > 0)
+                    {
+                        var commandItem = XlsxMergeCommandItem.DeleteRow(_docOriginMergeInto, worksheetName, currentRowNumber, rowCount);
+                        CommandList.Add(commandItem);
+                    }
                 }
             }
         }
