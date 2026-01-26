@@ -1,10 +1,11 @@
 ﻿using XlsxMerge.Features.Diffs;
+using XlsxMerge.Features.Diffs.Enums;
 
 namespace XlsxMerge.Features.Merges;
 
 public class HunkMergeDecision
 {
-    public List<DocOrigin> DocMergeOrder; // null = Conflict 상태로 둡니다. Empty = 모두 삭제. 
+    public List<DocOrigin>? DocMergeOrder; // null = Conflict 상태로 둡니다. Empty = 모두 삭제. 
     public readonly DiffHunkInfo BaseHunkInfo;
     public readonly List<List<DocOrigin>> DocMergeOrderCandidates; // 이 Hunk에서 선택 가능한 document merge orders.
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using XlsxMerge.Features.Diffs.Enums;
 using XlsxMerge.Model;
 
 namespace XlsxMerge.Features.Diffs;

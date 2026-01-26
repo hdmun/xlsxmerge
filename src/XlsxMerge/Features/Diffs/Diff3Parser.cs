@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using XlsxMerge.Features.Diffs.Enums;
 
 namespace XlsxMerge.Features.Diffs;
 

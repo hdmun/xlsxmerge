@@ -425,11 +425,18 @@ namespace XlsxMerge.View
 			}
 
 
-
             var worksheetBase = _diffViewModel.GetWorksheetsBy(sheetResult.WorksheetName, DocOrigin.Base);
-			var previewData = MergeResultPreviewData.GeneratePreviewData(getCurrentSheetDecision(), worksheetBase == null ? 0 : worksheetBase.RowCount, checkBoxHideRemovedLines.Checked, checkBoxHideEqualLines.Checked);
+			var previewData = MergeResultPreviewData.GeneratePreviewData(
+				getCurrentSheetDecision(),
+				worksheetBase?.RowCount ?? 0,
+                _diffViewModel.IsHideRemovedLines,
+                _diffViewModel.IsHideEqualLines
+            );
+
 			previewDataCache[sheetResult.WorksheetName] = previewData;
-			MergeResultPreviewer.RefreshDataGridViewContents(_diffViewModel, sheetDecision, dataGridView1, previewData);
+
+			MergeResultPreviewer.RefreshDataGridViewContents(_diffViewModel, sheetDecision, previewData, dataGridView1);
+
 			UpdateDataGridViewColumnName();
 
 			_dataGridViewCellUpdatingInProgress = false;
