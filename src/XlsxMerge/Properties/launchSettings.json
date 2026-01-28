@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "XlsxMerge": {
+      "commandName": "Project",
+      "commandLineArgs": "-b C:\\Workspace\\xlsxmerge\\examples\\example1.xml\r\n-d C:\\Workspace\\xlsxmerge\\examples\\example2.xml\r\n-r C:\\Workspace\\xlsxmerge\\examples\\example_result.xml"
+    }
+  }
+}

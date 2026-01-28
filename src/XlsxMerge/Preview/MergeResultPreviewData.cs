@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using XlsxMerge.Features.Diffs;
+using XlsxMerge.Features.Diffs.Enums;
 using XlsxMerge.Features.Merges;
 
 namespace XlsxMerge
@@ -24,8 +25,11 @@ namespace XlsxMerge
 			return candidateHunkIdx;
 		}
 
-		public static MergeResultPreviewData GeneratePreviewData(SheetMergeDecision sheetDecision,
-			int worksheetBaseRowCount, bool hideDeletedLines, bool hideEqualLines)
+		public static MergeResultPreviewData GeneratePreviewData(
+			SheetMergeDecision sheetDecision,
+			int worksheetBaseRowCount,
+			bool hideDeletedLines,
+			bool hideEqualLines)
 		{
 			if (sheetDecision == null)
 				return null;
@@ -62,11 +66,14 @@ namespace XlsxMerge
 
 				previewData.HunkStartsPosList.Add(previewData.RowInfoList.Count);
 
+                // isConflict
 				if (hunkMergeOrderToShow == null)
 				{
 					previewData.RowInfoList.Add("vv충돌");
+
 					for (int i = rowRangeBase.RowNumber; i < rowRangeBase.RowNumber + rowRangeBase.RowCount; i++)
 						previewData.RowInfoList.Add($"base:{i}");
+
 					for (int i = 0; i < rowRangeMine.RowCount; i++)
 					{
 						var lineContents = $"mine:{i + rowRangeMine.RowNumber}";

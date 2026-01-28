@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using XlsxMerge.Features.Diffs.Enums;
 
 namespace XlsxMerge.Features.Diffs;
 
@@ -20,20 +21,16 @@ public class Diff3Parser
         { "2", DocOrigin.Mine },
         { "3", DocOrigin.Theirs },
     };
-    
-    private readonly List<DiffHunkInfo> _hunkInfoList;
 
     public Diff3Parser()
     {
-        _hunkInfoList = new();
     }
 
     public List<DiffHunkInfo> Parse(string diff3ResultText)
     {
-        _hunkInfoList.Clear();
-        DiffHunkInfo? hunkInfo = null;
+        var hunkInfoList = new List<DiffHunkInfo>();
 
-        StringReader sr = new StringReader(diff3ResultText);
+        using StringReader sr = new StringReader(diff3ResultText);
         while (sr.Peek() != -1)
         {
             var curLine = sr.ReadLine();
@@ -41,10 +38,14 @@ public class Diff3Parser
             {
                 var text = curLine.Trim();
                 var hunStatus = _hunkStatusMap[text];
-                hunkInfo = new DiffHunkInfo(hunStatus);
-                _hunkInfoList.Add(hunkInfo);
+                var newHunkInfo = new DiffHunkInfo(hunStatus);
+                hunkInfoList.Add(newHunkInfo);
                 continue;
             }
+
+            var hunkInfo = hunkInfoList.LastOrDefault();
+            if (hunkInfo is null)
+                continue;
 
             Match m = _regexLineInfo.Match(curLine);
             if (m.Success == false)
@@ -55,11 +56,10 @@ public class Diff3Parser
             string command = m.Groups[3].Value;
 
             var (origin, rowRagne) = ParseInternal(fileIndex, rangeToken, command);
-            hunkInfo.rowRangeMap[origin] = rowRagne;
+            hunkInfo.Add(origin, rowRagne);
         }
-        sr.Dispose();
 
-        return _hunkInfoList;
+        return hunkInfoList;
     }
 
     private (DocOrigin origin, RowRange rowRagne) ParseInternal(string fileIndex, string[] rangeToken, string command)

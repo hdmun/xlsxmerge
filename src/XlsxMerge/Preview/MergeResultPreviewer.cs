@@ -13,8 +13,8 @@ namespace XlsxMerge
         public static void RefreshDataGridViewContents(
             DiffViewModel diffViewModel,
 			SheetMergeDecision sheetMergeDecision,
-			DataGridView dataGridView,
-			MergeResultPreviewData previewData)
+			MergeResultPreviewData previewData,
+            DataGridView dataGridView)
 		{
 			if (sheetMergeDecision == null)
 				return;
@@ -37,13 +37,12 @@ namespace XlsxMerge
                 return;
             }
 
-			var cachedTempPreviewLines = previewData.RowInfoList;
+            var cachedTempPreviewLines = previewData.RowInfoList;
 
             // iterate rows
 			dataGridView.RowCount = cachedTempPreviewLines?.Count() ?? 0;
 			for (int currentRowIdx = 0; currentRowIdx < dataGridView.RowCount; currentRowIdx++)
 			{
-				var eachRow = cachedTempPreviewLines[currentRowIdx];
 				DataGridViewRow dgvRow = dataGridView.Rows[currentRowIdx];
 
                 // set 'hunk_no' cell
@@ -53,7 +52,7 @@ namespace XlsxMerge
 					var candidateHunkIdx = previewData.GetHunkIdxByRowNumber(currentRowIdx);
                     if (candidateHunkIdx >= 0)
                     {
-                        if (sheetMergeDecision.HunkMergeDecisionList[candidateHunkIdx].DocMergeOrder == null)
+                        if (sheetMergeDecision.HunkMergeDecisionList[candidateHunkIdx].IsConflict)
                             hunkNoCell.Style.SelectionBackColor = Color.Red;
                         else
                             hunkNoCell.Style.SelectionBackColor = Color.LightSlateGray;
@@ -63,6 +62,8 @@ namespace XlsxMerge
 				}
 
                 // parse token
+                // 스트링 파싱하지 말고 row info 정보를 구성하자
+                var eachRow = cachedTempPreviewLines[currentRowIdx];
                 string[] token = eachRow.Split(new char[] { ':' });
                 if (token.Length == 1)
 				{
